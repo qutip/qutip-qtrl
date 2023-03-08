@@ -9,7 +9,7 @@ The qutip-qtrl package, QuTiP quantum optimal control, aims at providing advance
 Compared to other libraries for quantum optimal control, qutip-qtrl puts additional emphasis on the physics layer and the interaction with the QuTiP package.
 The package offers support for both the CRAB and GRAPE methods.
 
-If you would like to know the future development plan and ideas, have a look at the [discussion panel](https://github.com/qutip/qutip-qtrl/discussions) as well as the [qutip documentation for ideas](https://qutip.org/docs/latest/development/ideas.html).
+If you would like to know the future development plan and ideas, have a look at the [qutip documentation for ideas](https://qutip.org/docs/latest/development/ideas.html).
 
 Quick start
 -----------
