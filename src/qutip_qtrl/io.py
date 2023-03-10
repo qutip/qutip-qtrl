@@ -4,7 +4,7 @@ import os
 import errno
 
 
-def create_dir(dir_name, desc='output'):
+def create_dir(dir_name, desc="output"):
     """
     Checks if the given directory exists, if not it is created
 
@@ -21,15 +21,14 @@ def create_dir(dir_name, desc='output'):
         Error msg if directory creation failed
     """
     dir_ok = True
-    if '~' in dir_name:
+    if "~" in dir_name:
         dir_name = os.path.expanduser(dir_name)
     elif not os.path.isabs(dir_name):
         # Assume relative path from cwd given
         dir_name = os.path.abspath(dir_name)
 
     msg = "{} directory is ready".format(desc)
-    errmsg = "Failed to create {} directory:\n{}\n".format(desc,
-                                                           dir_name)
+    errmsg = "Failed to create {} directory:\n{}\n".format(desc, dir_name)
     if os.path.exists(dir_name):
         if os.path.isfile(dir_name):
             dir_ok = False
@@ -37,7 +36,7 @@ def create_dir(dir_name, desc='output'):
     else:
         try:
             os.makedirs(dir_name)
-            msg += ("directory {} created (recursively)".format(dir_name))
+            msg += "directory {} created (recursively)".format(dir_name)
         except OSError as e:
             if e.errno == errno.EEXIST:
                 msg += (
@@ -47,7 +46,8 @@ def create_dir(dir_name, desc='output'):
             else:
                 dir_ok = False
                 errmsg += "Underling error (makedirs) :({}) {}".format(
-                    type(e).__name__, e)
+                    type(e).__name__, e
+                )
 
     if dir_ok:
         return dir_ok, dir_name, msg

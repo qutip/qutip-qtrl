@@ -75,6 +75,7 @@ import qutip_qtrl.pulsegen as pulsegen
 import qutip_qtrl.dump as qtrldump
 
 import qutip.logging_utils as logging
+
 logger = logging.get_logger()
 
 # Older versions of SciPy use the method numpy.ndarray.tostring(), which has
@@ -84,13 +85,16 @@ logger = logging.get_logger()
 # removed from Numpy until at least 1.22, by which point we'll have been able
 # to drop support for SciPy 1.4.
 if _parse_version(scipy.__version__) < _parse_version("1.5"):
+
     @functools.wraps(spopt.fmin_l_bfgs_b)
     def fmin_l_bfgs_b(*args, **kwargs):
         with warnings.catch_warnings():
             message = r"tostring\(\) is deprecated\. Use tobytes\(\) instead\."
-            warnings.filterwarnings("ignore", message=message,
-                                    category=DeprecationWarning)
+            warnings.filterwarnings(
+                "ignore", message=message, category=DeprecationWarning
+            )
             return spopt.fmin_l_bfgs_b(*args, **kwargs)
+
 else:
     fmin_l_bfgs_b = spopt.fmin_l_bfgs_b
 
@@ -107,7 +111,6 @@ def _is_string(var):
             return False
     except:
         return False
-
 
 
 class Optimizer(object):
@@ -242,15 +245,15 @@ class Optimizer(object):
 
     def reset(self):
         self.log_level = self.config.log_level
-        self.id_text = 'OPTIM'
+        self.id_text = "OPTIM"
         self.termination_conditions = None
         self.pulse_generator = None
         self.disp_conv_msg = False
         self.iteration_steps = None
         self.record_iteration_steps = False
-        self.alg = 'GRAPE'
+        self.alg = "GRAPE"
         self.alg_params = None
-        self.method = 'l_bfgs_b'
+        self.method = "l_bfgs_b"
         self.method_params = None
         self.method_options = None
         self.approx_grad = False
@@ -269,10 +272,10 @@ class Optimizer(object):
 
         # AJGP 2015-04-21:
         # These (copying from config) are here for backward compatibility
-        if hasattr(self.config, 'amp_lbound'):
+        if hasattr(self.config, "amp_lbound"):
             if self.config.amp_lbound:
                 self.amp_lbound = self.config.amp_lbound
-        if hasattr(self.config, 'amp_ubound'):
+        if hasattr(self.config, "amp_ubound"):
             if self.config.amp_ubound:
                 self.amp_ubound = self.config.amp_ubound
 
@@ -321,7 +324,7 @@ class Optimizer(object):
         to the user to specify which logs are dumped
         """
         if self.dump is None:
-            lvl = 'NONE'
+            lvl = "NONE"
         else:
             lvl = self.dump.level
 
@@ -335,7 +338,7 @@ class Optimizer(object):
             if not isinstance(value, str):
                 raise TypeError("Value must be string value")
             lvl = value.upper()
-            if lvl == 'NONE':
+            if lvl == "NONE":
                 self.dump = None
             else:
                 if not isinstance(self.dump, qtrldump.OptimDump):
@@ -353,7 +356,7 @@ class Optimizer(object):
     @dump_dir.setter
     def dump_dir(self, value):
         if not self.dump:
-            self.dumping = 'SUMMARY'
+            self.dumping = "SUMMARY"
         self.dump.dump_dir = value
 
     def _create_result(self):
@@ -381,8 +384,9 @@ class Optimizer(object):
         term_conds = self.termination_conditions
 
         if not isinstance(term_conds, termcond.TerminationConditions):
-            raise errors.UsageError("No termination conditions for the "
-                                    "optimisation function")
+            raise errors.UsageError(
+                "No termination conditions for the " "optimisation function"
+            )
 
         if not isinstance(self.dynamics, dynamics.Dynamics):
             raise errors.UsageError("No dynamics object attribute set")
@@ -391,8 +395,10 @@ class Optimizer(object):
         self.apply_method_params()
 
         if term_conds.fid_err_targ is None and term_conds.fid_goal is None:
-            raise errors.UsageError("Either the goal or the fidelity "
-                                    "error tolerance must be set")
+            raise errors.UsageError(
+                "Either the goal or the fidelity "
+                "error tolerance must be set"
+            )
 
         if term_conds.fid_err_targ is None:
             term_conds.fid_err_targ = np.abs(1 - term_conds.fid_goal)
@@ -400,7 +406,7 @@ class Optimizer(object):
         if term_conds.fid_goal is None:
             term_conds.fid_goal = 1 - term_conds.fid_err_targ
 
-        if self.alg == 'CRAB':
+        if self.alg == "CRAB":
             self.approx_grad = True
 
         if self.stats is not None:
@@ -408,11 +414,14 @@ class Optimizer(object):
 
         if self.dump_to_file:
             if self.dump is None:
-                self.dumping = 'SUMMARY'
+                self.dumping = "SUMMARY"
             self.dump.write_to_file = True
             self.dump.create_dump_dir()
-            logger.info("Optimiser dump will be written to:\n{}".format(
-                                        self.dump.dump_dir))
+            logger.info(
+                "Optimiser dump will be written to:\n{}".format(
+                    self.dump.dump_dir
+                )
+            )
 
         if self.dump:
             self.iter_summary = OptimIterSummary()
@@ -438,22 +447,22 @@ class Optimizer(object):
             self.method_options = {}
         mo = self.method_options
 
-        if 'max_metric_corr' in mo and 'maxcor' not in mo:
-            mo['maxcor'] = mo['max_metric_corr']
-        elif hasattr(self, 'max_metric_corr') and 'maxcor' not in mo:
-            mo['maxcor'] = self.max_metric_corr
-        if 'accuracy_factor' in mo and 'ftol' not in mo:
-            mo['ftol'] = mo['accuracy_factor']
-        elif hasattr(tc, 'accuracy_factor') and 'ftol' not in mo:
-            mo['ftol'] = tc.accuracy_factor
-        if tc.max_iterations > 0 and 'maxiter' not in mo:
-            mo['maxiter'] = tc.max_iterations
-        if tc.max_fid_func_calls > 0 and 'maxfev' not in mo:
-            mo['maxfev'] = tc.max_fid_func_calls
-        if tc.min_gradient_norm > 0 and 'gtol' not in mo:
-            mo['gtol'] = tc.min_gradient_norm
-        if 'disp' not in mo:
-            mo['disp'] = self.disp_conv_msg
+        if "max_metric_corr" in mo and "maxcor" not in mo:
+            mo["maxcor"] = mo["max_metric_corr"]
+        elif hasattr(self, "max_metric_corr") and "maxcor" not in mo:
+            mo["maxcor"] = self.max_metric_corr
+        if "accuracy_factor" in mo and "ftol" not in mo:
+            mo["ftol"] = mo["accuracy_factor"]
+        elif hasattr(tc, "accuracy_factor") and "ftol" not in mo:
+            mo["ftol"] = tc.accuracy_factor
+        if tc.max_iterations > 0 and "maxiter" not in mo:
+            mo["maxiter"] = tc.max_iterations
+        if tc.max_fid_func_calls > 0 and "maxfev" not in mo:
+            mo["maxfev"] = tc.max_fid_func_calls
+        if tc.min_gradient_norm > 0 and "gtol" not in mo:
+            mo["gtol"] = tc.min_gradient_norm
+        if "disp" not in mo:
+            mo["disp"] = self.disp_conv_msg
         return mo
 
     def apply_method_params(self, params=None):
@@ -562,20 +571,23 @@ class Optimizer(object):
             jac = self.fid_err_grad_wrapper
 
         if self.log_level <= logging.INFO:
-            msg = ("Optimising pulse(s) using {} with "
-                   "minimise '{}' method").format(self.alg, self.method)
+            msg = (
+                "Optimising pulse(s) using {} with " "minimise '{}' method"
+            ).format(self.alg, self.method)
             if self.approx_grad:
                 msg += " (approx grad)"
             logger.info(msg)
 
         try:
             opt_res = spopt.minimize(
-                self.fid_err_func_wrapper, self.optim_var_vals,
+                self.fid_err_func_wrapper,
+                self.optim_var_vals,
                 method=self.method,
                 jac=jac,
                 bounds=self.bounds,
                 options=self.method_options,
-                callback=self.iter_step_callback_func)
+                callback=self.iter_step_callback_func,
+            )
 
             amps = self._get_ctrl_amps(opt_res.x)
             dyn.update_ctrl_amps(amps)
@@ -583,10 +595,11 @@ class Optimizer(object):
             # Note the iterations are counted in this object as well
             # so there are compared here for interest sake only
             if self.num_iter != opt_res.nit:
-                logger.info("The number of iterations counted {} "
-                            " does not match the number reported {} "
-                            "by {}".format(self.num_iter, opt_res.nit,
-                                           self.method))
+                logger.info(
+                    "The number of iterations counted {} "
+                    " does not match the number reported {} "
+                    "by {}".format(self.num_iter, opt_res.nit, self.method)
+                )
             result.num_iter = opt_res.nit
 
         except errors.OptimizationTerminate as except_term:
@@ -641,8 +654,11 @@ class Optimizer(object):
         if self.stats is not None:
             self.stats.num_fidelity_func_calls = self.num_fid_func_calls
             if self.log_level <= logging.DEBUG:
-                logger.debug("fidelity error call {}".format(
-                    self.stats.num_fidelity_func_calls))
+                logger.debug(
+                    "fidelity error call {}".format(
+                        self.stats.num_fidelity_func_calls
+                    )
+                )
 
         amps = self._get_ctrl_amps(args[0].copy())
         self.dynamics.update_ctrl_amps(amps)
@@ -687,8 +703,9 @@ class Optimizer(object):
         if self.stats is not None:
             self.stats.num_grad_func_calls = self.num_grad_func_calls
             if self.log_level <= logging.DEBUG:
-                logger.debug("gradient call {}".format(
-                    self.stats.num_grad_func_calls))
+                logger.debug(
+                    "gradient call {}".format(self.stats.num_grad_func_calls)
+                )
         amps = self._get_ctrl_amps(args[0].copy())
         self.dynamics.update_ctrl_amps(amps)
         fid_comp = self.dynamics.fid_computer
@@ -783,9 +800,10 @@ class OptimizerBFGS(Optimizer):
     """
     Implements the run_optimization method using the BFGS algorithm
     """
+
     def reset(self):
         Optimizer.reset(self)
-        self.id_text = 'BFGS'
+        self.id_text = "BFGS"
 
     def run_optimization(self, term_conds=None):
         """
@@ -826,22 +844,33 @@ class OptimizerBFGS(Optimizer):
             fprime = self.fid_err_grad_wrapper
 
         if self.log_level <= logging.INFO:
-            msg = ("Optimising pulse(s) using {} with "
-                   "'fmin_bfgs' method").format(self.alg)
+            msg = (
+                "Optimising pulse(s) using {} with " "'fmin_bfgs' method"
+            ).format(self.alg)
             if self.approx_grad:
                 msg += " (approx grad)"
             logger.info(msg)
 
         result = self._create_result()
         try:
-            optim_var_vals, cost, grad, invHess, nFCalls, nGCalls, warn = \
-                spopt.fmin_bfgs(self.fid_err_func_wrapper,
-                                self.optim_var_vals,
-                                fprime=fprime,
-                                callback=self.iter_step_callback_func,
-                                gtol=term_conds.min_gradient_norm,
-                                maxiter=term_conds.max_iterations,
-                                full_output=True, disp=True)
+            (
+                optim_var_vals,
+                cost,
+                grad,
+                invHess,
+                nFCalls,
+                nGCalls,
+                warn,
+            ) = spopt.fmin_bfgs(
+                self.fid_err_func_wrapper,
+                self.optim_var_vals,
+                fprime=fprime,
+                callback=self.iter_step_callback_func,
+                gtol=term_conds.min_gradient_norm,
+                maxiter=term_conds.max_iterations,
+                full_output=True,
+                disp=True,
+            )
 
             amps = self._get_ctrl_amps(optim_var_vals)
             dyn.update_ctrl_amps(amps)
@@ -877,7 +906,7 @@ class OptimizerLBFGSB(Optimizer):
 
     def reset(self):
         Optimizer.reset(self)
-        self.id_text = 'LBFGSB'
+        self.id_text = "LBFGSB"
         self.max_metric_corr = 10
         self.msg_level = None
 
@@ -893,10 +922,10 @@ class OptimizerLBFGSB(Optimizer):
 
         # AJGP 2015-04-21:
         # These (copying from config) are here for backward compatibility
-        if hasattr(self.config, 'max_metric_corr'):
+        if hasattr(self.config, "max_metric_corr"):
             if self.config.max_metric_corr:
                 self.max_metric_corr = self.config.max_metric_corr
-        if hasattr(self.config, 'accuracy_factor'):
+        if hasattr(self.config, "accuracy_factor"):
             if self.config.accuracy_factor:
                 term_conds.accuracy_factor = self.config.accuracy_factor
 
@@ -958,56 +987,62 @@ class OptimizerLBFGSB(Optimizer):
         else:
             fprime = self.fid_err_grad_wrapper
 
-        if 'accuracy_factor' in self.method_options:
-            factr = self.method_options['accuracy_factor']
-        elif 'ftol' in self.method_options:
-            factr = self.method_options['ftol']
-        elif hasattr(term_conds, 'accuracy_factor'):
+        if "accuracy_factor" in self.method_options:
+            factr = self.method_options["accuracy_factor"]
+        elif "ftol" in self.method_options:
+            factr = self.method_options["ftol"]
+        elif hasattr(term_conds, "accuracy_factor"):
             factr = term_conds.accuracy_factor
         else:
             factr = 1e7
 
-        if 'max_metric_corr' in self.method_options:
-            m = self.method_options['max_metric_corr']
-        elif 'maxcor' in self.method_options:
-            m = self.method_options['maxcor']
-        elif hasattr(self, 'max_metric_corr'):
+        if "max_metric_corr" in self.method_options:
+            m = self.method_options["max_metric_corr"]
+        elif "maxcor" in self.method_options:
+            m = self.method_options["maxcor"]
+        elif hasattr(self, "max_metric_corr"):
             m = self.max_metric_corr
         else:
             m = 10
 
         if self.log_level <= logging.INFO:
-            msg = ("Optimising pulse(s) using {} with "
-                   "'fmin_l_bfgs_b' method").format(self.alg)
+            msg = (
+                "Optimising pulse(s) using {} with " "'fmin_l_bfgs_b' method"
+            ).format(self.alg)
             if self.approx_grad:
                 msg += " (approx grad)"
             logger.info(msg)
         try:
             optim_var_vals, fid, res_dict = fmin_l_bfgs_b(
-                self.fid_err_func_wrapper, self.optim_var_vals,
+                self.fid_err_func_wrapper,
+                self.optim_var_vals,
                 fprime=fprime,
                 approx_grad=self.approx_grad,
                 callback=self.iter_step_callback_func,
-                bounds=self.bounds, m=m, factr=factr,
+                bounds=self.bounds,
+                m=m,
+                factr=factr,
                 pgtol=term_conds.min_gradient_norm,
                 disp=self.msg_level,
                 maxfun=term_conds.max_fid_func_calls,
-                maxiter=term_conds.max_iterations)
+                maxiter=term_conds.max_iterations,
+            )
 
             amps = self._get_ctrl_amps(optim_var_vals)
             dyn.update_ctrl_amps(amps)
-            warn = res_dict['warnflag']
+            warn = res_dict["warnflag"]
             if warn == 0:
                 result.grad_norm_min_reached = True
                 result.termination_reason = "function converged"
             elif warn == 1:
                 result.max_iter_exceeded = True
-                result.termination_reason = ("Iteration or fidelity "
-                                             "function call limit reached")
+                result.termination_reason = (
+                    "Iteration or fidelity " "function call limit reached"
+                )
             elif warn == 2:
-                result.termination_reason = res_dict['task']
+                result.termination_reason = res_dict["task"]
 
-            result.num_iter = res_dict['nit']
+            result.num_iter = res_dict["nit"]
         except errors.OptimizationTerminate as except_term:
             self._interpret_term_exception(except_term, result)
 
@@ -1030,7 +1065,7 @@ class OptimizerCrab(Optimizer):
 
     def reset(self):
         Optimizer.reset(self)
-        self.id_text = 'CRAB'
+        self.id_text = "CRAB"
         self.num_optim_vars = 0
 
     def init_optim(self, term_conds):
@@ -1057,24 +1092,30 @@ class OptimizerCrab(Optimizer):
 
         elif len(self.pulse_generator) != dyn.num_ctrls:
             pulse_gen_valid = False
-            err_msg = ("the number of pulse generators {} does not equal "
-                       "the number of controls {}".format(
-                           len(self.pulse_generator), dyn.num_ctrls))
+            err_msg = (
+                "the number of pulse generators {} does not equal "
+                "the number of controls {}".format(
+                    len(self.pulse_generator), dyn.num_ctrls
+                )
+            )
 
         if pulse_gen_valid:
             for p_gen in self.pulse_generator:
                 if not isinstance(p_gen, pulsegen.PulseGenCrab):
                     pulse_gen_valid = False
-                    err_msg =\
+                    err_msg = (
                         "pulse_generator contained object of type '{}'".format(
-                            p_gen.__class__.__name__)
+                            p_gen.__class__.__name__
+                        )
+                    )
                     break
                 self.num_optim_vars += p_gen.num_optim_vars
 
         if not pulse_gen_valid:
             raise errors.UsageError(
                 "The pulse_generator attribute must be set to a list of "
-                "PulseGenCrab - one for each control. Here " + err_msg)
+                "PulseGenCrab - one for each control. Here " + err_msg
+            )
 
     def _build_bounds_list(self):
         """
@@ -1119,7 +1160,9 @@ class OptimizerCrab(Optimizer):
             changed_params = self.optim_var_vals != optim_var_vals
             logger.debug(
                 "{} out of {} optimisation parameters changed".format(
-                    changed_params.sum(), len(optim_var_vals)))
+                    changed_params.sum(), len(optim_var_vals)
+                )
+            )
 
         amps = np.empty([dyn.num_tslots, dyn.num_ctrls])
         j = 0
@@ -1154,7 +1197,7 @@ class OptimizerCrabFmin(OptimizerCrab):
 
     def reset(self):
         OptimizerCrab.reset(self)
-        self.id_text = 'CRAB_FMIN'
+        self.id_text = "CRAB_FMIN"
         self.xtol = 1e-4
         self.ftol = 1e-4
 
@@ -1198,18 +1241,24 @@ class OptimizerCrabFmin(OptimizerCrab):
         result = self._create_result()
 
         if self.log_level <= logging.INFO:
-            logger.info("Optimising pulse(s) using {} with "
-                        "'fmin' (Nelder-Mead) method".format(self.alg))
+            logger.info(
+                "Optimising pulse(s) using {} with "
+                "'fmin' (Nelder-Mead) method".format(self.alg)
+            )
 
         try:
             ret = spopt.fmin(
-                    self.fid_err_func_wrapper, self.optim_var_vals,
-                    xtol=self.xtol, ftol=self.ftol,
-                    maxiter=term_conds.max_iterations,
-                    maxfun=term_conds.max_fid_func_calls,
-                    full_output=True, disp=self.disp_conv_msg,
-                    retall=self.record_iteration_steps,
-                    callback=self.iter_step_callback_func)
+                self.fid_err_func_wrapper,
+                self.optim_var_vals,
+                xtol=self.xtol,
+                ftol=self.ftol,
+                maxiter=term_conds.max_iterations,
+                maxfun=term_conds.max_fid_func_calls,
+                full_output=True,
+                disp=self.disp_conv_msg,
+                retall=self.record_iteration_steps,
+                callback=self.iter_step_callback_func,
+            )
 
             final_param_vals = ret[0]
             num_iter = ret[2]
@@ -1222,25 +1271,30 @@ class OptimizerCrabFmin(OptimizerCrab):
             # Note the iterations are counted in this object as well
             # so there are compared here for interest sake only
             if self.num_iter != num_iter:
-                logger.info("The number of iterations counted {} "
-                            " does not match the number reported {} "
-                            "by {}".format(self.num_iter, num_iter,
-                                           self.method))
+                logger.info(
+                    "The number of iterations counted {} "
+                    " does not match the number reported {} "
+                    "by {}".format(self.num_iter, num_iter, self.method)
+                )
             result.num_iter = num_iter
             if warn_flag == 0:
-                result.termination_reason = \
+                result.termination_reason = (
                     "Function converged (within tolerance)"
+                )
             elif warn_flag == 1:
-                result.termination_reason = \
+                result.termination_reason = (
                     "Maximum number of function evaluations reached"
+                )
                 result.max_fid_func_exceeded = True
             elif warn_flag == 2:
-                result.termination_reason = \
+                result.termination_reason = (
                     "Maximum number of iterations reached"
+                )
                 result.max_iter_exceeded = True
             else:
-                result.termination_reason = \
-                    "Unknown (warn_flag={})".format(warn_flag)
+                result.termination_reason = "Unknown (warn_flag={})".format(
+                    warn_flag
+                )
 
         except errors.OptimizationTerminate as except_term:
             self._interpret_term_exception(except_term, result)
@@ -1277,23 +1331,23 @@ class OptimIterSummary(qtrldump.DumpSummaryItem):
         Time spent computing the pulse optimisation so far
         (in seconds of elapsed time)
     """
+
     # Note there is some duplication here with Optimizer attributes
     # this exists solely to be copied into the summary dump
     min_col_width = 11
     summary_property_names = (
-        "idx", "iter_num", "fid_func_call_num", "grad_func_call_num",
-        "fid_err", "grad_norm", "wall_time"
-        )
+        "idx",
+        "iter_num",
+        "fid_func_call_num",
+        "grad_func_call_num",
+        "fid_err",
+        "grad_norm",
+        "wall_time",
+    )
 
-    summary_property_fmt_type = (
-        'd', 'd', 'd', 'd',
-        'g', 'g', 'g'
-        )
+    summary_property_fmt_type = ("d", "d", "d", "d", "g", "g", "g")
 
-    summary_property_fmt_prec = (
-        0, 0, 0, 0,
-        4, 4, 2
-        )
+    summary_property_fmt_prec = (0, 0, 0, 0, 4, 4, 2)
 
     def __init__(self):
         self.reset()

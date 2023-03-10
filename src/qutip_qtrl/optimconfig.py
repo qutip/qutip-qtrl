@@ -10,10 +10,13 @@ Configuration parameters for control pulse optimisation
 """
 
 import numpy as np
+
 # QuTiP logging
 import qutip.logging_utils
-logger = qutip.logging_utils.get_logger('qutip.control.optimconfig')
+
+logger = qutip.logging_utils.get_logger("qutip.control.optimconfig")
 import qutip_qtrl.io as qtrlio
+
 
 class OptimConfig(object):
     """
@@ -55,13 +58,13 @@ class OptimConfig(object):
 
     def reset(self):
         self.log_level = logger.getEffectiveLevel()
-        self.alg = 'GRAPE'  # Alts: 'CRAB'
-        self.optim_method = 'DEF'
-        self.dyn_type = 'DEF'
-        self.fid_type = 'DEF'
-        self.fid_type = 'DEF'
-        self.tslot_type = 'DEF'
-        self.init_pulse_type = 'DEF'
+        self.alg = "GRAPE"  # Alts: 'CRAB'
+        self.optim_method = "DEF"
+        self.dyn_type = "DEF"
+        self.fid_type = "DEF"
+        self.fid_type = "DEF"
+        self.tslot_type = "DEF"
+        self.init_pulse_type = "DEF"
 
     @property
     def log_level(self):
@@ -75,7 +78,7 @@ class OptimConfig(object):
         """
         logger.setLevel(lvl)
 
-    def check_create_output_dir(self, output_dir, desc='output'):
+    def check_create_output_dir(self, output_dir, desc="output"):
         """
         Checks if the given directory exists, if not it is created
         Returns

@@ -101,6 +101,7 @@ class Stats(object):
     mean_num_ctrl_amp_changes_per_update : float
         Mean average number of control amplitudes that are changed per update
     """
+
     def __init__(self):
         self.reset()
 
@@ -141,31 +142,35 @@ class Stats(object):
         # If the optimation is still running then the optimisation
         # time is the time so far
         if self.wall_time_optim_end > 0.0:
-            self.wall_time_optim = \
+            self.wall_time_optim = (
                 self.wall_time_optim_end - self.wall_time_optim_start
+            )
 
         try:
-            self.mean_num_ctrl_amp_updates_per_iter = \
+            self.mean_num_ctrl_amp_updates_per_iter = (
                 self.num_ctrl_amp_updates / float(self.num_iter)
+            )
         except Exception:
             self.mean_num_ctrl_amp_updates_per_iter = np.NaN
 
         try:
-            self.mean_num_timeslot_changes_per_update = \
+            self.mean_num_timeslot_changes_per_update = (
                 self.num_timeslot_changes / float(self.num_ctrl_amp_updates)
+            )
         except Exception:
             self.mean_num_timeslot_changes_per_update = np.NaN
 
         try:
-            self.mean_num_ctrl_amp_changes_per_update = \
+            self.mean_num_ctrl_amp_changes_per_update = (
                 self.num_ctrl_amp_changes / float(self.num_ctrl_amp_updates)
+            )
         except Exception:
             self.mean_num_ctrl_amp_changes_per_update = np.NaN
 
     def _format_datetime(self, t, tot=0.0):
         dtStr = str(datetime.timedelta(seconds=t))
         if tot > 0:
-            percent = 100*t/tot
+            percent = 100 * t / tot
             dtStr += " ({:03.2f}%)".format(percent)
         return dtStr
 
@@ -173,8 +178,10 @@ class Stats(object):
         """
         Print a report of the stats to the console
         """
-        print("\n------------------------------------"
-              "\n---- Control optimisation stats ----")
+        print(
+            "\n------------------------------------"
+            "\n---- Control optimisation stats ----"
+        )
         self.report_timings()
         self.report_func_calls()
         self.report_amp_updates()
@@ -183,49 +190,83 @@ class Stats(object):
     def report_timings(self):
         print("**** Timings (HH:MM:SS.US) ****")
         tot = self.wall_time_optim
-        print("Total wall time elapsed during optimisation: " +
-              self._format_datetime(tot))
-        print("Wall time computing Hamiltonians: " +
-              self._format_datetime(self.wall_time_dyn_gen_compute, tot))
-        print("Wall time computing propagators: " +
-              self._format_datetime(self.wall_time_prop_compute, tot))
-        print("Wall time computing forward propagation: " +
-              self._format_datetime(self.wall_time_fwd_prop_compute, tot))
-        print("Wall time computing onward propagation: " +
-              self._format_datetime(self.wall_time_onwd_prop_compute, tot))
-        print("Wall time computing gradient: " +
-              self._format_datetime(self.wall_time_gradient_compute, tot))
+        print(
+            "Total wall time elapsed during optimisation: "
+            + self._format_datetime(tot)
+        )
+        print(
+            "Wall time computing Hamiltonians: "
+            + self._format_datetime(self.wall_time_dyn_gen_compute, tot)
+        )
+        print(
+            "Wall time computing propagators: "
+            + self._format_datetime(self.wall_time_prop_compute, tot)
+        )
+        print(
+            "Wall time computing forward propagation: "
+            + self._format_datetime(self.wall_time_fwd_prop_compute, tot)
+        )
+        print(
+            "Wall time computing onward propagation: "
+            + self._format_datetime(self.wall_time_onwd_prop_compute, tot)
+        )
+        print(
+            "Wall time computing gradient: "
+            + self._format_datetime(self.wall_time_gradient_compute, tot)
+        )
         print("")
 
     def report_func_calls(self):
         print("**** Iterations and function calls ****")
         print("Number of iterations: {}".format(self.num_iter))
-        print("Number of fidelity function calls: "
-              "{}".format(self.num_fidelity_func_calls))
-        print("Number of times fidelity is computed: "
-              "{}".format(self.num_fidelity_computes))
-        print("Number of gradient function calls: "
-              "{}".format(self.num_grad_func_calls))
-        print("Number of times gradients are computed: "
-              "{}".format(self.num_grad_computes))
-        print("Number of times timeslot evolution is recomputed: "
-              "{}".format(self.num_tslot_recompute))
+        print(
+            "Number of fidelity function calls: "
+            "{}".format(self.num_fidelity_func_calls)
+        )
+        print(
+            "Number of times fidelity is computed: "
+            "{}".format(self.num_fidelity_computes)
+        )
+        print(
+            "Number of gradient function calls: "
+            "{}".format(self.num_grad_func_calls)
+        )
+        print(
+            "Number of times gradients are computed: "
+            "{}".format(self.num_grad_computes)
+        )
+        print(
+            "Number of times timeslot evolution is recomputed: "
+            "{}".format(self.num_tslot_recompute)
+        )
         print("")
 
     def report_amp_updates(self):
         print("**** Control amplitudes ****")
-        print("Number of control amplitude updates: "
-              "{}".format(self.num_ctrl_amp_updates))
-        print("Mean number of updates per iteration: "
-              "{}".format(self.mean_num_ctrl_amp_updates_per_iter))
-        print("Number of timeslot values changed: "
-              "{}".format(self.num_timeslot_changes))
-        print("Mean number of timeslot changes per update: "
-              "{}".format(self.mean_num_timeslot_changes_per_update))
-        print("Number of amplitude values changed: "
-              "{}".format(self.num_ctrl_amp_changes))
-        print("Mean number of amplitude changes per update: "
-              "{}".format(self.mean_num_ctrl_amp_changes_per_update))
+        print(
+            "Number of control amplitude updates: "
+            "{}".format(self.num_ctrl_amp_updates)
+        )
+        print(
+            "Mean number of updates per iteration: "
+            "{}".format(self.mean_num_ctrl_amp_updates_per_iter)
+        )
+        print(
+            "Number of timeslot values changed: "
+            "{}".format(self.num_timeslot_changes)
+        )
+        print(
+            "Mean number of timeslot changes per update: "
+            "{}".format(self.mean_num_timeslot_changes_per_update)
+        )
+        print(
+            "Number of amplitude values changed: "
+            "{}".format(self.num_ctrl_amp_changes)
+        )
+        print(
+            "Mean number of amplitude changes per update: "
+            "{}".format(self.mean_num_ctrl_amp_changes_per_update)
+        )
 
 
 class StatsDynTsUpdate(Stats):
@@ -300,42 +341,49 @@ class StatsDynTsUpdate(Stats):
 
     def calculate(self):
         Stats.calculate(self)
-        self.mean_num_dyn_gen_computes_per_update = \
+        self.mean_num_dyn_gen_computes_per_update = (
             self.num_dyn_gen_computes / float(self.num_ctrl_amp_updates)
+        )
 
-        self.mean_wall_time_dyn_gen_compute = \
-            (self.wall_time_dyn_gen_compute /
-             float(self.num_dyn_gen_computes))
+        self.mean_wall_time_dyn_gen_compute = (
+            self.wall_time_dyn_gen_compute / float(self.num_dyn_gen_computes)
+        )
 
-        self.mean_num_prop_computes_per_update = \
+        self.mean_num_prop_computes_per_update = (
             self.num_prop_computes / float(self.num_ctrl_amp_updates)
+        )
 
-        self.mean_wall_time_prop_compute = \
-            self.wall_time_prop_compute / float(self.num_prop_computes)
+        self.mean_wall_time_prop_compute = self.wall_time_prop_compute / float(
+            self.num_prop_computes
+        )
 
-        self.mean_num_fwd_prop_step_computes_per_update = \
-            (self.num_fwd_prop_step_computes /
-             float(self.num_ctrl_amp_updates))
+        self.mean_num_fwd_prop_step_computes_per_update = (
+            self.num_fwd_prop_step_computes / float(self.num_ctrl_amp_updates)
+        )
 
-        self.mean_wall_time_fwd_prop_compute = \
-            (self.wall_time_fwd_prop_compute /
-             float(self.num_fwd_prop_step_computes))
+        self.mean_wall_time_fwd_prop_compute = (
+            self.wall_time_fwd_prop_compute
+            / float(self.num_fwd_prop_step_computes)
+        )
 
-        self.mean_num_onwd_prop_step_computes_per_update = \
-            (self.num_onwd_prop_step_computes /
-             float(self.num_ctrl_amp_updates))
+        self.mean_num_onwd_prop_step_computes_per_update = (
+            self.num_onwd_prop_step_computes / float(self.num_ctrl_amp_updates)
+        )
 
-        self.mean_wall_time_onwd_prop_compute = \
-            (self.wall_time_onwd_prop_compute /
-             float(self.num_onwd_prop_step_computes))
+        self.mean_wall_time_onwd_prop_compute = (
+            self.wall_time_onwd_prop_compute
+            / float(self.num_onwd_prop_step_computes)
+        )
 
     def report(self):
         """
         Print a report of the stats to the console
         """
 
-        print("\n------------------------------------"
-              "\n---- Control optimisation stats ----")
+        print(
+            "\n------------------------------------"
+            "\n---- Control optimisation stats ----"
+        )
         self.report_timings()
         self.report_func_calls()
         self.report_amp_updates()
@@ -346,38 +394,64 @@ class StatsDynTsUpdate(Stats):
 
     def report_dyn_gen_comps(self):
         print("**** {} Computations ****".format(self.dyn_gen_name))
-        print("Total number of {} computations: "
-              "{}".format(self.dyn_gen_name, self.num_dyn_gen_computes))
-        print("Mean number of {} computations per update: "
-              "{}".format(self.dyn_gen_name,
-                          self.mean_num_dyn_gen_computes_per_update))
-        print("Mean wall time to compute {}s: "
-              "{} s".format(self.dyn_gen_name,
-                            self.mean_wall_time_dyn_gen_compute))
+        print(
+            "Total number of {} computations: "
+            "{}".format(self.dyn_gen_name, self.num_dyn_gen_computes)
+        )
+        print(
+            "Mean number of {} computations per update: "
+            "{}".format(
+                self.dyn_gen_name, self.mean_num_dyn_gen_computes_per_update
+            )
+        )
+        print(
+            "Mean wall time to compute {}s: "
+            "{} s".format(
+                self.dyn_gen_name, self.mean_wall_time_dyn_gen_compute
+            )
+        )
         print("**** Propagator Computations ****")
-        print("Total number of propagator computations: "
-              "{}".format(self.num_prop_computes))
-        print("Mean number of propagator computations per update: "
-              "{}".format(self.mean_num_prop_computes_per_update))
-        print("Mean wall time to compute propagator "
-              "{} s".format(self.mean_wall_time_prop_compute))
+        print(
+            "Total number of propagator computations: "
+            "{}".format(self.num_prop_computes)
+        )
+        print(
+            "Mean number of propagator computations per update: "
+            "{}".format(self.mean_num_prop_computes_per_update)
+        )
+        print(
+            "Mean wall time to compute propagator "
+            "{} s".format(self.mean_wall_time_prop_compute)
+        )
 
     def report_fwd_prop(self):
         print("**** Forward Propagation ****")
-        print("Total number of forward propagation step computations: "
-              "{}".format(self.num_fwd_prop_step_computes))
-        print("Mean number of forward propagation step computations"
-              " per update: "
-              "{}".format(self.mean_num_fwd_prop_step_computes_per_update))
-        print("Mean wall time to compute forward propagation "
-              "{} s".format(self.mean_wall_time_fwd_prop_compute))
+        print(
+            "Total number of forward propagation step computations: "
+            "{}".format(self.num_fwd_prop_step_computes)
+        )
+        print(
+            "Mean number of forward propagation step computations"
+            " per update: "
+            "{}".format(self.mean_num_fwd_prop_step_computes_per_update)
+        )
+        print(
+            "Mean wall time to compute forward propagation "
+            "{} s".format(self.mean_wall_time_fwd_prop_compute)
+        )
 
     def report_onwd_prop(self):
         print("**** Onward Propagation ****")
-        print("Total number of onward propagation step computations: "
-              "{}".format(self.num_onwd_prop_step_computes))
-        print("Mean number of onward propagation step computations"
-              " per update: "
-              "{}".format(self.mean_num_onwd_prop_step_computes_per_update))
-        print("Mean wall time to compute onward propagation "
-              "{} s".format(self.mean_wall_time_onwd_prop_compute))
+        print(
+            "Total number of onward propagation step computations: "
+            "{}".format(self.num_onwd_prop_step_computes)
+        )
+        print(
+            "Mean number of onward propagation step computations"
+            " per update: "
+            "{}".format(self.mean_num_onwd_prop_step_computes_per_update)
+        )
+        print(
+            "Mean wall time to compute onward propagation "
+            "{} s".format(self.mean_wall_time_onwd_prop_compute)
+        )

@@ -28,12 +28,16 @@ in the class descriptions.
 import timeit
 import warnings
 import numpy as np
+
 # QuTiP
 from qutip import Qobj
+
 # QuTiP control modules
 import qutip_qtrl.errors as errors
+
 # QuTiP logging
 import qutip.logging_utils as logging
+
 logger = logging.get_logger()
 
 
@@ -125,6 +129,7 @@ class FidelityComputer(object):
         flag to specify whether the fidelity / fid_err are based on the
         current amplitude values. Set False when amplitudes change
     """
+
     def __init__(self, dynamics, params=None):
         self.parent = dynamics
         self.params = params
@@ -136,7 +141,7 @@ class FidelityComputer(object):
         clear any temporarily held status data
         """
         self.log_level = self.parent.log_level
-        self.id_text = 'FID_COMP_BASE'
+        self.id_text = "FID_COMP_BASE"
         self.dimensional_norm = 1.0
         self.fid_norm_func = None
         self.grad_norm_func = None
@@ -200,7 +205,8 @@ class FidelityComputer(object):
         # must be implemented by subclass
         raise errors.UsageError(
             "No method defined for getting fidelity error."
-            " Suspect base class was used where sub class should have been")
+            " Suspect base class was used where sub class should have been"
+        )
 
     def get_fid_err_gradient(self):
         """
@@ -208,9 +214,11 @@ class FidelityComputer(object):
         in a (nTimeslots x n_ctrls) array wrt the timeslot control amplitude
         """
         # must be implemented by subclass
-        raise errors.UsageError("No method defined for getting fidelity"
-                                " error gradient. Suspect base class was"
-                                " used where sub class should have been")
+        raise errors.UsageError(
+            "No method defined for getting fidelity"
+            " error gradient. Suspect base class was"
+            " used where sub class should have been"
+        )
 
     def flag_system_changed(self):
         """
@@ -223,25 +231,29 @@ class FidelityComputer(object):
     @property
     def uses_evo_t2end(self):
         _attrib_deprecation(
-                "'uses_evo_t2end' has been replaced by 'uses_onwd_evo'")
+            "'uses_evo_t2end' has been replaced by 'uses_onwd_evo'"
+        )
         return self.uses_onwd_evo
 
     @uses_evo_t2end.setter
     def uses_evo_t2end(self, value):
         _attrib_deprecation(
-                "'uses_evo_t2end' has been replaced by 'uses_onwd_evo'")
+            "'uses_evo_t2end' has been replaced by 'uses_onwd_evo'"
+        )
         self.uses_onwd_evo = value
 
     @property
     def uses_evo_t2targ(self):
         _attrib_deprecation(
-                "'uses_evo_t2targ' has been replaced by 'uses_onto_evo'")
+            "'uses_evo_t2targ' has been replaced by 'uses_onto_evo'"
+        )
         return self.uses_onto_evo
 
     @uses_evo_t2targ.setter
     def uses_evo_t2targ(self, value):
         _attrib_deprecation(
-                "'uses_evo_t2targ' has been replaced by 'uses_onto_evo'")
+            "'uses_evo_t2targ' has been replaced by 'uses_onto_evo'"
+        )
         self.uses_onto_evo = value
 
 
@@ -267,11 +279,12 @@ class FidCompUnitary(FidelityComputer):
         flag to specify whether fidelity_prenorm are based on the
         current amplitude values. Set False when amplitudes change
     """
+
     def reset(self):
         FidelityComputer.reset(self)
-        self.id_text = 'UNIT'
+        self.id_text = "UNIT"
         self.uses_onto_evo = True
-        self._init_phase_option('PSU')
+        self._init_phase_option("PSU")
         self.apply_params()
 
     def clear(self):
@@ -286,8 +299,9 @@ class FidCompUnitary(FidelityComputer):
         SU - global phase important
         PSU - global phase is not important
         """
-        _func_deprecation("'set_phase_option' is deprecated. "
-                          "Use phase_option property")
+        _func_deprecation(
+            "'set_phase_option' is deprecated. " "Use phase_option property"
+        )
         self._init_phase_option(phase_option)
 
     @property
@@ -305,26 +319,30 @@ class FidCompUnitary(FidelityComputer):
 
     def _init_phase_option(self, value):
         self._phase_option = value
-        if value == 'PSU':
+        if value == "PSU":
             self.fid_norm_func = self.normalize_PSU
             self.grad_norm_func = self.normalize_gradient_PSU
-        elif value == 'SU':
+        elif value == "SU":
             self.fid_norm_func = self.normalize_SU
             self.grad_norm_func = self.normalize_gradient_SU
         elif value is None:
-            raise errors.UsageError("phase_option cannot be set to None"
-                                    " for this FidelityComputer.")
+            raise errors.UsageError(
+                "phase_option cannot be set to None"
+                " for this FidelityComputer."
+            )
         else:
             raise errors.UsageError(
-                    "No option for phase_option '{}'".format(value))
+                "No option for phase_option '{}'".format(value)
+            )
 
     def init_comp(self):
         """
         Check configuration and initialise the normalisation
         """
         if self.fid_norm_func is None or self.grad_norm_func is None:
-            raise errors.UsageError("The phase_option must be be set"
-                                    "for this fidelity computer")
+            raise errors.UsageError(
+                "The phase_option must be be set" "for this fidelity computer"
+            )
         self.init_normalization()
 
     def flag_system_changed(self):
@@ -349,8 +367,9 @@ class FidCompUnitary(FidelityComputer):
         """
         dyn = self.parent
         self.dimensional_norm = 1.0
-        self.dimensional_norm = \
-            self.fid_norm_func(dyn.target.dag()*dyn.target)
+        self.dimensional_norm = self.fid_norm_func(
+            dyn.target.dag() * dyn.target
+        )
 
     def normalize_SU(self, A):
         try:
@@ -391,8 +410,9 @@ class FidCompUnitary(FidelityComputer):
         This PSU version is independent of global phase
         """
         fid_pn = self.get_fidelity_prenorm()
-        return np.real(grad * np.exp(-1j * np.angle(fid_pn))
-                       / self.dimensional_norm)
+        return np.real(
+            grad * np.exp(-1j * np.angle(fid_pn)) / self.dimensional_norm
+        )
 
     def get_fid_err(self):
         """
@@ -407,8 +427,7 @@ class FidCompUnitary(FidelityComputer):
         which should be set in the config
         """
         if not self.fidelity_current:
-            self.fidelity = \
-                self.fid_norm_func(self.get_fidelity_prenorm())
+            self.fidelity = self.fid_norm_func(self.get_fidelity_prenorm())
             self.fidelity_current = True
             if self.log_level <= logging.DEBUG:
                 logger.debug("Fidelity (normalised): {}".format(self.fidelity))
@@ -425,7 +444,7 @@ class FidCompUnitary(FidelityComputer):
             k = dyn.tslot_computer._get_timeslot_for_fidelity_calc()
             dyn.compute_evolution()
             if dyn.oper_dtype == Qobj:
-                f = dyn._onto_evo[k]*dyn._fwd_evo[k]
+                f = dyn._onto_evo[k] * dyn._fwd_evo[k]
                 if isinstance(f, Qobj):
                     f = f.tr()
             else:
@@ -435,8 +454,11 @@ class FidCompUnitary(FidelityComputer):
             if dyn.stats is not None:
                 dyn.stats.num_fidelity_computes += 1
             if self.log_level <= logging.DEBUG:
-                logger.debug("Fidelity (pre normalisation): {}".format(
-                    self.fidelity_prenorm))
+                logger.debug(
+                    "Fidelity (pre normalisation): {}".format(
+                        self.fidelity_prenorm
+                    )
+                )
         return self.fidelity_prenorm
 
     def get_fid_err_gradient(self):
@@ -451,8 +473,11 @@ class FidCompUnitary(FidelityComputer):
             dyn = self.parent
             grad_prenorm = self.compute_fid_grad()
             if self.log_level <= logging.DEBUG_INTENSE:
-                logger.log(logging.DEBUG_INTENSE, "pre-normalised fidelity "
-                           "gradients:\n{}".format(grad_prenorm))
+                logger.log(
+                    logging.DEBUG_INTENSE,
+                    "pre-normalised fidelity "
+                    "gradients:\n{}".format(grad_prenorm),
+                )
             # AJGP: Note this check should not be necessary if dynamics are
             #       unitary. However, if they are not then this gradient
             #       can still be used, however the interpretation is dubious
@@ -467,12 +492,16 @@ class FidCompUnitary(FidelityComputer):
 
             self.grad_norm = np.sqrt(np.sum(self.fid_err_grad**2))
             if self.log_level <= logging.DEBUG_INTENSE:
-                logger.log(logging.DEBUG_INTENSE, "Normalised fidelity error "
-                           "gradients:\n{}".format(self.fid_err_grad))
+                logger.log(
+                    logging.DEBUG_INTENSE,
+                    "Normalised fidelity error "
+                    "gradients:\n{}".format(self.fid_err_grad),
+                )
 
             if self.log_level <= logging.DEBUG:
-                logger.debug("Gradient (sum sq norm): "
-                             "{} ".format(self.grad_norm))
+                logger.debug(
+                    "Gradient (sum sq norm): " "{} ".format(self.grad_norm)
+                )
 
         return self.fid_err_grad
 
@@ -497,18 +526,20 @@ class FidCompUnitary(FidelityComputer):
         for j in range(n_ctrls):
             for k in range(n_ts):
                 fwd_evo = dyn._fwd_evo[k]
-                onto_evo = dyn._onto_evo[k+1]
+                onto_evo = dyn._onto_evo[k + 1]
                 if dyn.oper_dtype == Qobj:
-                    g = onto_evo*dyn._get_prop_grad(k, j)*fwd_evo
+                    g = onto_evo * dyn._get_prop_grad(k, j) * fwd_evo
                     if isinstance(g, Qobj):
                         g = g.tr()
                 else:
-                    g = _trace(onto_evo.dot(
-                                dyn._get_prop_grad(k, j)).dot(fwd_evo))
+                    g = _trace(
+                        onto_evo.dot(dyn._get_prop_grad(k, j)).dot(fwd_evo)
+                    )
                 grad[k, j] = g
         if dyn.stats is not None:
-            dyn.stats.wall_time_gradient_compute += \
+            dyn.stats.wall_time_gradient_compute += (
                 timeit.default_timer() - time_st
+            )
         return grad
 
 
@@ -536,13 +567,14 @@ class FidCompTraceDiff(FidelityComputer):
 
     def reset(self):
         FidelityComputer.reset(self)
-        self.id_text = 'TRACEDIFF'
+        self.id_text = "TRACEDIFF"
         self.scale_factor = None
         self.uses_onwd_evo = True
         if not self.parent.prop_computer.grad_exact:
             raise errors.UsageError(
                 "This FidelityComputer can only be"
-                " used with an exact gradient PropagatorComputer.")
+                " used with an exact gradient PropagatorComputer."
+            )
         self.apply_params()
 
     def init_comp(self):
@@ -551,10 +583,11 @@ class FidCompTraceDiff(FidelityComputer):
         Calculates the scale_factor is not already set
         """
         if self.scale_factor is None:
-            self.scale_factor = 1.0 / (2.0*self.parent.get_drift_dim())
+            self.scale_factor = 1.0 / (2.0 * self.parent.get_drift_dim())
             if self.log_level <= logging.DEBUG:
-                logger.debug("Scale factor calculated as {}".format(
-                    self.scale_factor))
+                logger.debug(
+                    "Scale factor calculated as {}".format(self.scale_factor)
+                )
 
     def get_fid_err(self):
         """
@@ -567,20 +600,26 @@ class FidCompTraceDiff(FidelityComputer):
             evo_final = dyn._fwd_evo[n_ts]
             evo_f_diff = dyn._target - evo_final
             if self.log_level <= logging.DEBUG_VERBOSE:
-                logger.log(logging.DEBUG_VERBOSE, "Calculating TraceDiff "
-                           "fidelity...\n Target:\n{}\n Evo final:\n{}\n"
-                           "Evo final diff:\n{}".format(dyn._target, evo_final,
-                                                        evo_f_diff))
+                logger.log(
+                    logging.DEBUG_VERBOSE,
+                    "Calculating TraceDiff "
+                    "fidelity...\n Target:\n{}\n Evo final:\n{}\n"
+                    "Evo final diff:\n{}".format(
+                        dyn._target, evo_final, evo_f_diff
+                    ),
+                )
 
             # Calculate the fidelity error using the trace difference norm
             # Note that the value should have not imagnary part, so using
             # np.real, just avoids the complex casting warning
             if dyn.oper_dtype == Qobj:
-                self.fid_err = self.scale_factor*np.real(
-                        (evo_f_diff.dag()*evo_f_diff).tr())
+                self.fid_err = self.scale_factor * np.real(
+                    (evo_f_diff.dag() * evo_f_diff).tr()
+                )
             else:
-                self.fid_err = self.scale_factor*np.real(_trace(
-                        evo_f_diff.conj().T.dot(evo_f_diff)))
+                self.fid_err = self.scale_factor * np.real(
+                    _trace(evo_f_diff.conj().T.dot(evo_f_diff))
+                )
 
             if np.isnan(self.fid_err):
                 self.fid_err = np.Inf
@@ -611,12 +650,14 @@ class FidCompTraceDiff(FidelityComputer):
 
             self.grad_norm = np.sqrt(np.sum(self.fid_err_grad**2))
             if self.log_level <= logging.DEBUG_INTENSE:
-                logger.log(logging.DEBUG_INTENSE, "fidelity error gradients:\n"
-                           "{}".format(self.fid_err_grad))
+                logger.log(
+                    logging.DEBUG_INTENSE,
+                    "fidelity error gradients:\n"
+                    "{}".format(self.fid_err_grad),
+                )
 
             if self.log_level <= logging.DEBUG:
-                logger.debug("Gradient norm: "
-                             "{} ".format(self.grad_norm))
+                logger.debug("Gradient norm: " "{} ".format(self.grad_norm))
 
         return self.fid_err_grad
 
@@ -646,26 +687,33 @@ class FidCompTraceDiff(FidelityComputer):
             for k in range(n_ts):
                 fwd_evo = dyn._fwd_evo[k]
                 if dyn.oper_dtype == Qobj:
-                    evo_grad = dyn._get_prop_grad(k, j)*fwd_evo
-                    if k+1 < n_ts:
-                        evo_grad = dyn._onwd_evo[k+1]*evo_grad
+                    evo_grad = dyn._get_prop_grad(k, j) * fwd_evo
+                    if k + 1 < n_ts:
+                        evo_grad = dyn._onwd_evo[k + 1] * evo_grad
                     # Note that the value should have not imagnary part, so
                     # using np.real, just avoids the complex casting warning
-                    g = -2*self.scale_factor*np.real(
-                                    (evo_f_diff.dag()*evo_grad).tr())
+                    g = (
+                        -2
+                        * self.scale_factor
+                        * np.real((evo_f_diff.dag() * evo_grad).tr())
+                    )
                 else:
                     evo_grad = dyn._get_prop_grad(k, j).dot(fwd_evo)
-                    if k+1 < n_ts:
-                        evo_grad = dyn._onwd_evo[k+1].dot(evo_grad)
-                    g = -2*self.scale_factor*np.real(_trace(
-                                    evo_f_diff.conj().T.dot(evo_grad)))
+                    if k + 1 < n_ts:
+                        evo_grad = dyn._onwd_evo[k + 1].dot(evo_grad)
+                    g = (
+                        -2
+                        * self.scale_factor
+                        * np.real(_trace(evo_f_diff.conj().T.dot(evo_grad)))
+                    )
                 if np.isnan(g):
                     g = np.Inf
 
                 grad[k, j] = g
         if dyn.stats is not None:
-            dyn.stats.wall_time_gradient_compute += \
+            dyn.stats.wall_time_gradient_compute += (
                 timeit.default_timer() - time_st
+            )
         return grad
 
 
@@ -680,9 +728,10 @@ class FidCompTraceDiffApprox(FidCompTraceDiff):
         control amplitude offset to use when approximating the gradient wrt
         a timeslot control amplitude
     """
+
     def reset(self):
         FidelityComputer.reset(self)
-        self.id_text = 'TDAPPROX'
+        self.id_text = "TDAPPROX"
         self.uses_onwd_evo = True
         self.scale_factor = None
         self.epsilon = 0.001
@@ -717,30 +766,33 @@ class FidCompTraceDiffApprox(FidCompTraceDiff):
                 fwd_evo = dyn._fwd_evo[k]
                 prop_eps = prop_comp._compute_diff_prop(k, j, self.epsilon)
                 if dyn.oper_dtype == Qobj:
-                    evo_final_eps = fwd_evo*prop_eps
-                    if k+1 < n_ts:
-                        evo_final_eps = evo_final_eps*dyn._onwd_evo[k+1]
+                    evo_final_eps = fwd_evo * prop_eps
+                    if k + 1 < n_ts:
+                        evo_final_eps = evo_final_eps * dyn._onwd_evo[k + 1]
                     evo_f_diff_eps = dyn._target - evo_final_eps
                     # Note that the value should have not imagnary part, so
                     # using np.real, just avoids the complex casting warning
-                    fid_err_eps = self.scale_factor*np.real(
-                        (evo_f_diff_eps.dag()*evo_f_diff_eps).tr())
+                    fid_err_eps = self.scale_factor * np.real(
+                        (evo_f_diff_eps.dag() * evo_f_diff_eps).tr()
+                    )
                 else:
                     evo_final_eps = fwd_evo.dot(prop_eps)
-                    if k+1 < n_ts:
-                        evo_final_eps = evo_final_eps.dot(dyn._onwd_evo[k+1])
+                    if k + 1 < n_ts:
+                        evo_final_eps = evo_final_eps.dot(dyn._onwd_evo[k + 1])
                     evo_f_diff_eps = dyn._target - evo_final_eps
-                    fid_err_eps = self.scale_factor*np.real(_trace(
-                        evo_f_diff_eps.conj().T.dot(evo_f_diff_eps)))
+                    fid_err_eps = self.scale_factor * np.real(
+                        _trace(evo_f_diff_eps.conj().T.dot(evo_f_diff_eps))
+                    )
 
-                g = (fid_err_eps - curr_fid_err)/self.epsilon
+                g = (fid_err_eps - curr_fid_err) / self.epsilon
                 if np.isnan(g):
                     g = np.Inf
 
                 grad[k, j] = g
 
         if dyn.stats is not None:
-            dyn.stats.wall_time_gradient_compute += \
+            dyn.stats.wall_time_gradient_compute += (
                 timeit.default_timer() - time_st
+            )
 
         return grad

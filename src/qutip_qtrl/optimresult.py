@@ -78,6 +78,7 @@ class OptimResult(object):
     optimizer : Optimizer
         Instance of the Optimizer used to generate the result
     """
+
     def __init__(self):
         self.reset()
 
