@@ -14,7 +14,7 @@ In quantum control we look to prepare some specific state, effect some state-to-
 
 2. What is the shape of the control pulse required to achieve this?
 
-These questions are addressed as *controllability* and *quantum optimal control* [dAless08]_. The answer to question of *controllability* is determined by the commutability of the dynamics generators and is formalised as the *Lie Algebra Rank Criterion* and is discussed in detail in [dAless08]_. The solutions to the second question can be determined through optimal control algorithms, or control pulse optimisation.
+These questions are addressed as *controllability* and *quantum optimal control* :cite:`dAless08`. The answer to question of *controllability* is determined by the commutability of the dynamics generators and is formalised as the *Lie Algebra Rank Criterion* and is discussed in detail in :cite:`dAless08`. The solutions to the second question can be determined through optimal control algorithms, or control pulse optimisation.
 
 .. figure:: figures/quant_optim_ctrl.png
    :align: center
@@ -59,7 +59,7 @@ We can use optimal control algorithms to determine a set of :math:`u_j` that wil
 
 The GRAPE algorithm
 ===================
-The **GR**\ adient **A**\ scent **P**\ ulse **E**\ ngineering was first proposed in [NKanej]_. Solutions to Schrödinger's equation for a time-dependent Hamiltonian are not generally possible to obtain analytically. Therefore, a piecewise constant approximation to the pulse amplitudes is made. Time allowed for the system to evolve :math:`T` is split into :math:`M` timeslots (typically these are of equal duration), during which the control amplitude is assumed to remain constant. The combined Hamiltonian can then be approximated as:
+The **GR**\ adient **A**\ scent **P**\ ulse **E**\ ngineering was first proposed in :cite:`NKanej`. Solutions to Schrödinger's equation for a time-dependent Hamiltonian are not generally possible to obtain analytically. Therefore, a piecewise constant approximation to the pulse amplitudes is made. Time allowed for the system to evolve :math:`T` is split into :math:`M` timeslots (typically these are of equal duration), during which the control amplitude is assumed to remain constant. The combined Hamiltonian can then be approximated as:
 
 .. math::
 
@@ -125,7 +125,7 @@ approximate the Hessian based on successive iterations. The most popular of
 these (in quantum optimal control) is the Broyden–Fletcher–Goldfarb–Shanno
 algorithm (BFGS). The default method in the QuTiP Qtrl GRAPE implementation is
 the L-BFGS-B method in Scipy, which is a wrapper to the implementation
-described in [Byrd95]_. This limited memory and bounded method does not need to
+described in :cite:`Byrd95`. This limited memory and bounded method does not need to
 store the entire Hessian, which reduces the computer memory required, and
 allows bounds to be set for variable values, which considering these are field
 amplitudes is often physical.
@@ -138,7 +138,7 @@ systems, with unitary dynamics, a method using the eigendecomposition is used,
 which is efficient as it is also used in the propagator calculation (to
 exponentiate the combined Hamiltonian). More generally (for example open
 systems and symplectic dynamics) the Frechet derivative (or augmented matrix)
-method is used, which is described in [Flo12]_. For other optimisation goals it
+method is used, which is described in :cite:`Flo12`. For other optimisation goals it
 may not be possible to calculate analytic gradients. In these cases it is
 necessary to approximate the gradients, but this can be very expensive, and can
 lead to other algorithms out-performing GRAPE.
@@ -146,7 +146,7 @@ lead to other algorithms out-performing GRAPE.
 
 The CRAB Algorithm
 ===================
-It has been shown [Lloyd14]_, the dimension of a quantum optimal control
+It has been shown :cite:`Lloyd14`, the dimension of a quantum optimal control
 problem is a polynomial function of the dimension of the manifold of the
 time-polynomial reachable states, when allowing for a finite control precision
 and evolution time. You can think of this as the information content of the
@@ -154,7 +154,7 @@ pulse (as being the only effective input) being very limited e.g. the pulse is
 compressible to a few bytes without loosing the target.
 
 This is where the **C**\ hopped **RA**\ ndom **B**\ asis (CRAB) algorithm
-[Doria11]_, [Caneva11]_ comes into play: Since the pulse complexity is usually
+:cite:`Doria11`, :cite:`Caneva11` comes into play: Since the pulse complexity is usually
 very low, it is sufficient to transform the optimal control problem to a few
 parameter search by introducing a physically motivated function basis that
 builds up the pulse. Compared to the number of time slices needed to accurately
@@ -173,7 +173,7 @@ the pulse and many more. Moreover initial guesses, if they are available, can
 
 As mentioned in the GRAPE paragraph, for CRAB local minima arising from
 algorithmic design can occur, too. However, for CRAB a 'dressed' version has
-recently been introduced [Rach15]_ that allows to escape local minima.
+recently been introduced :cite:`Rach15` that allows to escape local minima.
 
 For some control objectives and/or dynamical quantum descriptions, it is either
 not possible to derive the gradient for the cost functional with respect to
@@ -198,8 +198,8 @@ here, but there are the example notebooks. The second is referred to as Qtrl
 integrated into QuTiP. Qtrl uses the Scipy optimize functions to perform the
 multi-variable optimisation, typically the L-BFGS-B method for GRAPE and
 Nelder-Mead for CRAB. The GRAPE implementation in Qtrl was initially based on
-the open-source package  DYNAMO, which is a MATLAB implementation, and is
-described in [DYNAMO]_. It has since been restructured and extended for
+the open-source package DYNAMO, which is a MATLAB implementation, and is
+described in :cite:`DYNAMO`. It has since been restructured and extended for
 flexibility and compatibility within QuTiP.
 
 The rest of this section describes the Qtrl implementation and how to use it.
