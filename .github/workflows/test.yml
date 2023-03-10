@@ -1,0 +1,75 @@
+name: Tests
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+
+jobs:
+  cases:
+    name: ${{ matrix.os }}, python${{ matrix.python-version }}, ${{ matrix.case-name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - case-name: qutip@master
+            os: ubuntu-latest
+            qutip-version: '@master'
+            python-version: '3.11'
+          - case-name: qutip@master
+            os: windows-latest
+            qutip-version: '@master'
+            python-version: '3.10'
+          - case-name: qutip@master
+            os: macos-latest
+            qutip-version: '@master'
+            python-version: '3.9'
+          - case-name: qutip-5.0
+            os: ubuntu-latest
+            qutip-version: '==5.0.0a1'
+            qutip-pre: '--pre'
+            python-version: '3.8'
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install QuTiP from PyPI
+      if: ${{ matrix.qutip-version != '' && ! startsWith( matrix.qutip-version, '@') }}
+      run: python -m pip install ${{ matrix.qutip-pre }} 'qutip${{ matrix.qutip-version }}'
+
+    - name: Install QuTiP from GitHub
+      if: ${{ startsWith( matrix.qutip-version, '@') }}
+      run: |
+        python -m pip install numpy scipy cython
+        python -m pip install 'git+https://github.com/qutip/qutip.git${{ matrix.qutip-version }}'
+
+    - name: Install qutip-qtrl
+      # Installing in-place so that coveralls can locate the source code.
+      run: |
+        pip install -e .[full]
+    - name: Test with pytest and generate coverage report
+      run: |
+        pip install pytest-cov coveralls
+        pytest tests --strict-markers --cov=qutip_qtrl --cov=tests --cov-report=
+    - name: Upload to Coveralls
+      env:
+        GITHUB_TOKEN: ${{ secrets.github_token }}
+        COVERALLS_PARALLEL: true
+      run: coveralls --service=github
+
+  finalise:
+    name: Finalise coverage reporting
+    needs: [cases]
+    runs-on: ubuntu-latest
+    container: python:3-slim
+    steps:
+      - name: Finalise coverage reporting
+        env:
+          GITHUB_TOKEN: ${{ secrets.github_token }}
+        run: |
+          python -m pip install coveralls
+          coveralls --service=github --finish
