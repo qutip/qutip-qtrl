@@ -19,7 +19,7 @@ qutip-qtrl |version|: QuTiP quantum information processing
     :maxdepth: 2
     :caption: User guide
 
-    guide/introduction.rst
+    guide/guide-control.rst
 
 .. toctree::
     :maxdepth: 2
@@ -34,12 +34,16 @@ qutip-qtrl |version|: QuTiP quantum information processing
 
     changelog.rst
 
-
 .. toctree::
     :maxdepth: 2
     :caption: API documentation
 
     apidoc.rst
+
+.. toctree::
+    :caption: Bibliography
+
+    bibliography.rst
 
 
 Indices and tables
