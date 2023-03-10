@@ -209,7 +209,7 @@ class Optimizer(object):
         set to None to reduce overhead of calculating stats.
         Note it is (usually) shared with the Dynamics instance
 
-    dump : :class:`qutip.control.dump.OptimDump`
+    dump : :class:`qutip_qtrl.dump.OptimDump`
         Container for data dumped during the optimisation.
         Can be set by specifying the dumping level or set directly.
         Note this is mainly intended for user and a development debugging
@@ -1054,13 +1054,16 @@ class OptimizerLBFGSB(Optimizer):
 
 class OptimizerCrab(Optimizer):
     """
-    Optimises the pulse using the CRAB algorithm [1].
+    Optimises the pulse using the CRAB algorithm [Caneva]_.
     It uses the scipy.optimize.minimize function with the method specified
     by the optim_method attribute. See Optimizer.run_optimization for details
     It minimises the fidelity error function with respect to the CRAB
     basis function coefficients.
 
-    AJGP ToDo: Add citation here
+    References
+    ----------
+    .. [Caneva] T. Caneva, T. Calarco, and S. Montangero. Chopped random-basis quantum optimization,
+       Phys. Rev. A, 84:022326, 2011 (doi:10.1103/PhysRevA.84.022326)
     """
 
     def reset(self):
@@ -1181,7 +1184,7 @@ class OptimizerCrab(Optimizer):
 
 class OptimizerCrabFmin(OptimizerCrab):
     """
-    Optimises the pulse using the CRAB algorithm [1]_, [2]_.
+    Optimises the pulse using the CRAB algorithm [Doria]_, [Caneva]_.
     It uses the ``scipy.optimize.fmin`` function which is effectively a wrapper
     for the Nelder-Mead method.  It minimises the fidelity error function with
     respect to the CRAB basis function coefficients.  This is the default
@@ -1189,9 +1192,9 @@ class OptimizerCrabFmin(OptimizerCrab):
 
     References
     ----------
-    .. [1] P. Doria, T. Calarco & S. Montangero. Phys. Rev. Lett. 106, 190501
+    .. [Doria] P. Doria, T. Calarco & S. Montangero. Phys. Rev. Lett. 106, 190501
        (2011).
-    .. [2] T. Caneva, T. Calarco, & S. Montangero. Phys. Rev. A 84, 022326
+    .. [Caneva] T. Caneva, T. Calarco, & S. Montangero. Phys. Rev. A 84, 022326
        (2011).
     """
 

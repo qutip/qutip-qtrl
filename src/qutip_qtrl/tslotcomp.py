@@ -375,12 +375,13 @@ class TSlotCompUpdateAll(TimeslotComputer):
 class TSlotCompDynUpdate(TimeslotComputer):
     """
     Timeslot Computer - Dynamic Update
-    ********************************
-    ***** CURRENTLY HAS ISSUES *****
-    ***** AJGP 2014-10-02
-    ***** and is therefore not being maintained
-    ***** i.e. changes made to _UpdateAll are not being implemented here
-    ********************************
+
+    .. warning::
+
+        CURRENTLY HAS ISSUES (AJGP 2014-10-02)
+        and is therefore not being maintained
+        i.e. changes made to _UpdateAll are not being implemented here
+
     Updates only the dynamics generators, propagators and evolutions as
     required when a subset of the ctrl amplitudes are updated.
     Will update all if all amps have changed.
@@ -688,12 +689,12 @@ class EvoCompSummary(qtrldump.DumpSummaryItem):
 
     wall_time_fwd_prop_compute : float
         Time spent computing the forward evolution of the system
-        see :property:`dynamics.fwd_evo`
+        see ``dynamics.fwd_evo``
         (in seconds of elapsed time)
 
     wall_time_onwd_prop_compute : float
         Time spent computing the 'backward' evolution of the system
-        see :property:`dynamics.onwd_evo` and :property:`dynamics.onto_evo`
+        see ``dynamics.onwd_evo`` and ``dynamics.onto_evo``
         (in seconds of elapsed time)
     """
 
