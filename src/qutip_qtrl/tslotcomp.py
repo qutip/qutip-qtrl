@@ -38,8 +38,8 @@ import timeit
 # QuTiP
 from qutip import Qobj
 # QuTiP control modules
-import qutip.control.errors as errors
-import qutip.control.dump as qtrldump
+import qutip_qtrl.errors as errors
+import qutip_qtrl.dump as qtrldump
 # QuTiP logging
 import qutip.logging_utils as logging
 logger = logging.get_logger()
@@ -78,7 +78,7 @@ class TimeslotComputer:
         Will be set to None if neither stats or dump are set
     """
     def __init__(self, dynamics, params=None):
-        from qutip.control.dynamics import Dynamics
+        from qutip_qtrl.dynamics import Dynamics
         if not isinstance(dynamics, Dynamics):
             raise TypeError("Must instantiate with {} type".format(
                                         Dynamics))

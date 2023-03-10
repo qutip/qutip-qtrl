@@ -61,15 +61,15 @@ import warnings
 # QuTiP
 from qutip import Qobj
 # QuTiP control modules
-import qutip.control.optimconfig as optimconfig
-import qutip.control.dynamics as dynamics
-import qutip.control.termcond as termcond
-import qutip.control.optimizer as optimizer
-import qutip.control.stats as stats
-import qutip.control.errors as errors
-import qutip.control.fidcomp as fidcomp
-import qutip.control.propcomp as propcomp
-import qutip.control.pulsegen as pulsegen
+import qutip_qtrl.optimconfig as optimconfig
+import qutip_qtrl.dynamics as dynamics
+import qutip_qtrl.termcond as termcond
+import qutip_qtrl.optimizer as optimizer
+import qutip_qtrl.stats as stats
+import qutip_qtrl.errors as errors
+import qutip_qtrl.fidcomp as fidcomp
+import qutip_qtrl.propcomp as propcomp
+import qutip_qtrl.pulsegen as pulsegen
 import qutip.logging_utils as logging
 logger = logging.get_logger()
 

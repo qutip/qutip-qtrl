@@ -67,12 +67,12 @@ import numpy as np
 import scipy.optimize as spopt
 
 from qutip import Qobj
-import qutip.control.optimresult as optimresult
-import qutip.control.termcond as termcond
-import qutip.control.errors as errors
-import qutip.control.dynamics as dynamics
-import qutip.control.pulsegen as pulsegen
-import qutip.control.dump as qtrldump
+import qutip_qtrl.optimresult as optimresult
+import qutip_qtrl.termcond as termcond
+import qutip_qtrl.errors as errors
+import qutip_qtrl.dynamics as dynamics
+import qutip_qtrl.pulsegen as pulsegen
+import qutip_qtrl.dump as qtrldump
 
 import qutip.logging_utils as logging
 logger = logging.get_logger()

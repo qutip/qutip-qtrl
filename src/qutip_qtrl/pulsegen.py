@@ -14,8 +14,8 @@ See the class and gen_pulse function descriptions for details
 
 import numpy as np
 
-import qutip.control.dynamics as dynamics
-import qutip.control.errors as errors
+import qutip_qtrl.dynamics as dynamics
+import qutip_qtrl.errors as errors
 
 import qutip.logging_utils as logging
 logger = logging.get_logger()

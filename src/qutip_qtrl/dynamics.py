@@ -33,12 +33,12 @@ from qutip.core import data as _data
 from qutip.core.data.eigen import eigh
 from qutip.settings import settings
 # QuTiP control modules
-import qutip.control.errors as errors
-import qutip.control.tslotcomp as tslotcomp
-import qutip.control.fidcomp as fidcomp
-import qutip.control.propcomp as propcomp
-import qutip.control.symplectic as sympl
-import qutip.control.dump as qtrldump
+import qutip_qtrl.errors as errors
+import qutip_qtrl.tslotcomp as tslotcomp
+import qutip_qtrl.fidcomp as fidcomp
+import qutip_qtrl.propcomp as propcomp
+import qutip_qtrl.symplectic as sympl
+import qutip_qtrl.dump as qtrldump
 # QuTiP logging
 import qutip.logging_utils as logging
 logger = logging.get_logger()

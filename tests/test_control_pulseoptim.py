@@ -16,8 +16,14 @@ import scipy.optimize
 import scipy.sparse as sp
 
 import qutip
-from qutip.control import pulseoptim as cpo
-import qutip.control.loadparams
+import qutip_qtrl
+import qutip_qtrl.dynamics
+import qutip_qtrl.loadparams
+import qutip_qtrl.optimconfig
+import qutip_qtrl.pulsegen
+import qutip_qtrl.pulseoptim as cpo
+import qutip_qtrl.stats
+import qutip_qtrl.symplectic
 
 _sx = qutip.sigmax()
 _sy = qutip.sigmay()
@@ -93,7 +99,7 @@ _g1, _g2 = 1.0, 0.2
 _A_rotate = qutip.qdiags([[1, 1, 0, 0]], [0])
 _A_squeeze = 0.4 * qutip.qdiags([[1, -1, 0, 0]], [0])
 _A_target = qutip.qdiags([[1, 1], [1, 1]], [2, -2])
-_Omega = qutip.Qobj(qutip.control.symplectic.calc_omega(2))
+_Omega = qutip.Qobj(qutip_qtrl.symplectic.calc_omega(2))
 _sympl_system = qutip.qdiags([[1, 1, 1, 1], [_g1, _g2], [_g1, _g2]],
                              [0, 2, -2])
 _sympl_target = (-0.5 * _A_target * _Omega * np.pi).expm()
@@ -294,38 +300,38 @@ class TestOptimization:
 # into steps here.
 
 def _load_configuration(path):
-    configuration = qutip.control.optimconfig.OptimConfig()
+    configuration = qutip_qtrl.optimconfig.OptimConfig()
     configuration.param_fname = path.name
     configuration.param_fpath = str(path)
     configuration.pulse_type = "ZERO"
-    qutip.control.loadparams.load_parameters(str(path), config=configuration)
+    qutip_qtrl.loadparams.load_parameters(str(path), config=configuration)
     return configuration
 
 
 def _load_dynamics(path, system, configuration, stats):
-    dynamics = qutip.control.dynamics.DynamicsUnitary(configuration)
+    dynamics = qutip_qtrl.dynamics.DynamicsUnitary(configuration)
     dynamics.drift_dyn_gen = system.system
     dynamics.ctrl_dyn_gen = system.controls
     dynamics.initial = system.initial
     dynamics.target = system.target
-    qutip.control.loadparams.load_parameters(str(path), dynamics=dynamics)
+    qutip_qtrl.loadparams.load_parameters(str(path), dynamics=dynamics)
     dynamics.init_timeslots()
     dynamics.stats = stats
     return dynamics
 
 
 def _load_pulse_generator(path, configuration, dynamics):
-    pulse_generator = qutip.control.pulsegen.create_pulse_gen(
+    pulse_generator = qutip_qtrl.pulsegen.create_pulse_gen(
             pulse_type=configuration.pulse_type,
             dyn=dynamics)
-    qutip.control.loadparams.load_parameters(str(path),
+    qutip_qtrl.loadparams.load_parameters(str(path),
                                              pulsegen=pulse_generator)
     return pulse_generator
 
 
 def _load_termination_conditions(path):
-    conditions = qutip.control.termcond.TerminationConditions()
-    qutip.control.loadparams.load_parameters(str(path), term_conds=conditions)
+    conditions = qutip_qtrl.termcond.TerminationConditions()
+    qutip_qtrl.loadparams.load_parameters(str(path), term_conds=conditions)
     return conditions
 
 
@@ -333,15 +339,15 @@ def _load_optimizer(path, configuration, dynamics, pulse_generator,
                     termination_conditions, stats):
     method = configuration.optim_method
     if method is None:
-        raise qutip.control.errors.UsageError(
+        raise qutip_qtrl.errors.UsageError(
             "Optimization algorithm must be specified using the 'optim_method'"
             " parameter.")
     known = {'BFGS': 'OptimizerBFGS', 'FMIN_L_BFGS_B': 'OptimizerLBFGSB'}
-    constructor = getattr(qutip.control.optimizer,
+    constructor = getattr(qutip_qtrl.optimizer,
                           known.get(method, 'Optimizer'))
     optimizer = constructor(configuration, dynamics)
     optimizer.method = method
-    qutip.control.loadparams.load_parameters(str(path), optim=optimizer)
+    qutip_qtrl.loadparams.load_parameters(str(path), optim=optimizer)
     optimizer.config = configuration
     optimizer.dynamics = dynamics
     optimizer.pulse_generator = pulse_generator
@@ -354,7 +360,7 @@ class TestFileIO:
     def test_load_parameters_from_file(self):
         system = hadamard
         path = pathlib.Path(__file__).parent / "Hadamard_params.ini"
-        stats = qutip.control.stats.Stats()
+        stats = qutip_qtrl.stats.Stats()
         configuration = _load_configuration(path)
         dynamics = _load_dynamics(path, system, configuration, stats)
         pulse_generator = _load_pulse_generator(path, configuration, dynamics)

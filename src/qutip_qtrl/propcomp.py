@@ -22,7 +22,7 @@ import scipy.sparse as sp
 # QuTiP
 from qutip import Qobj
 # QuTiP control modules
-from qutip.control import errors
+from qutip_qtrl import errors
 # QuTiP logging
 import qutip.logging_utils as logging
 logger = logging.get_logger()

@@ -31,7 +31,7 @@ import numpy as np
 # QuTiP
 from qutip import Qobj
 # QuTiP control modules
-import qutip.control.errors as errors
+import qutip_qtrl.errors as errors
 # QuTiP logging
 import qutip.logging_utils as logging
 logger = logging.get_logger()

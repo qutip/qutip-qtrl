@@ -13,7 +13,7 @@ import copy
 import numpy as np
 from numpy.compat import asbytes
 # QuTiP control modules
-import qutip.control.io as qtrlio
+import qutip_qtrl.io as qtrlio
 # QuTiP logging
 import qutip.logging_utils
 logger = qutip.logging_utils.get_logger('qutip.control.dump')
@@ -243,7 +243,7 @@ class OptimDump(Dump):
 
     """
     def __init__(self, optim, level='SUMMARY'):
-        from qutip.control.optimizer import Optimizer
+        from qutip_qtrl.optimizer import Optimizer
         if not isinstance(optim, Optimizer):
             raise TypeError("Must instantiate with {} type".format(
                                         Optimizer))
@@ -506,7 +506,7 @@ class DynamicsDump(Dump):
 
     """
     def __init__(self, dynamics, level='SUMMARY'):
-        from qutip.control.dynamics import Dynamics
+        from qutip_qtrl.dynamics import Dynamics
         if not isinstance(dynamics, Dynamics):
             raise TypeError("Must instantiate with {} type".format(
                                         Dynamics))
