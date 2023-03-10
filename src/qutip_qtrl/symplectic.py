@@ -28,12 +28,12 @@ def calc_omega(n):
         Symplectic phase Omega
     """
 
-    omg = np.zeros((2*n, 2*n))
-    for j in range(2*n):
-        for k in range(2*n):
-            if k == j+1:
-                omg[j, k] = (1 + (-1)**j)/2
-            if k == j-1:
-                omg[j, k] = -(1 - (-1)**j)/2
+    omg = np.zeros((2 * n, 2 * n))
+    for j in range(2 * n):
+        for k in range(2 * n):
+            if k == j + 1:
+                omg[j, k] = (1 + (-1) ** j) / 2
+            if k == j - 1:
+                omg[j, k] = -(1 - (-1) ** j) / 2
 
     return omg

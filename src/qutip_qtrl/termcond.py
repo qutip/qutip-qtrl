@@ -40,7 +40,7 @@ class TerminationConditions:
     max_fid_func_calls : integer
         Maximum number of calls to the fidelity function during
         the optimisation algorithm
-        
+
     accuracy_factor : float
         Determines the accuracy of the result.
         Typical values for accuracy_factor are: 1e12 for low accuracy;
@@ -51,13 +51,14 @@ class TerminationConditions:
         (although the scale is different)
         Hence it is not defined here, but may be set by the user
     """
+
     def __init__(self):
         self.reset()
 
     def reset(self):
         self.fid_err_targ = 1e-5
         self.fid_goal = None
-        self.max_wall_time = 60*60.0
+        self.max_wall_time = 60 * 60.0
         self.min_gradient_norm = 1e-5
         self.max_iterations = 1e10
         self.max_fid_func_calls = 1e10
