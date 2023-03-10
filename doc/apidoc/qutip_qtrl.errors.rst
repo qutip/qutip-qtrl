@@ -2,6 +2,7 @@
 ==================
 
 .. automodule:: qutip_qtrl.errors
+   :members:
 
    .. rubric:: Exceptions
 

@@ -2,6 +2,7 @@
 =====================
 
 .. automodule:: qutip_qtrl.tslotcomp
+   :members:
 
    .. rubric:: Classes
 

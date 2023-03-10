@@ -2,6 +2,7 @@
 ====================
 
 .. automodule:: qutip_qtrl.dynamics
+   :members:
 
    .. rubric:: Classes
 

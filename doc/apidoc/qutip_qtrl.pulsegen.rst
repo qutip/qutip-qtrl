@@ -2,6 +2,7 @@
 ====================
 
 .. automodule:: qutip_qtrl.pulsegen
+   :members:
 
    .. rubric:: Functions
 

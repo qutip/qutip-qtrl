@@ -2,6 +2,7 @@
 ======================
 
 .. automodule:: qutip_qtrl.symplectic
+   :members:
 
    .. rubric:: Functions
 

@@ -2,6 +2,7 @@
 ==============
 
 .. automodule:: qutip_qtrl.io
+   :members:
 
    .. rubric:: Functions
 
