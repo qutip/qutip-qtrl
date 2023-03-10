@@ -80,7 +80,8 @@ class OptimConfig(object):
 
     def check_create_output_dir(self, output_dir, desc="output"):
         """
-        Checks if the given directory exists, if not it is created
+        Checks if the given directory exists, if not it is created.
+
         Returns
         -------
         dir_ok : boolean

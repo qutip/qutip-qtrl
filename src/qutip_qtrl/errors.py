@@ -21,6 +21,7 @@ class UsageError(Error):
     """
     A function has been used incorrectly. Most likely when a base class
     was used when a sub class should have been.
+    Attributes:
         funcname: function name where error occurred
         msg: Explanation
     """
