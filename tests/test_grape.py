@@ -52,11 +52,13 @@ def test_grape_unitary(grape_unitary_func):
     u_limits = None
 
     ones_t = np.ones(len(times))
-    u0 = np.array([
-        ones_t / len(times),
-        ones_t / len(times),
-        -ones_t / len(times),
-    ])
+    u0 = np.array(
+        [
+            ones_t / len(times),
+            ones_t / len(times),
+            -ones_t / len(times),
+        ]
+    )
 
     result = grape_unitary_func(
         U,
@@ -79,7 +81,7 @@ def test_grape_unitary(grape_unitary_func):
         times[-1],
         tlist=times,
         order=0,
-        options=dict(progress_bar=False, max_step=times[1] / 10.),
+        options=dict(progress_bar=False, max_step=times[1] / 10.0),
     )
     U_f_prop = U_f_prop / U_f_prop[0, 0]
 
