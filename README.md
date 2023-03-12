@@ -1,5 +1,11 @@
 # qutip-qtrl
 
+[![build](https://github.com/qutip/qutip-qtrl/workflows/Tests/badge.svg)](https://github.com/qutip/qutip-qtrl/actions)
+[![Documentation Status](https://readthedocs.org/projects/qutip-qtrl/badge/?version=stable)](https://qutip-qtrl.readthedocs.io/en/stable/)
+[![PyPI version](https://badge.fury.io/py/qutip-qtrl.svg)](https://badge.fury.io/py/qutip-qtrl)
+[![Maintainability](https://api.codeclimate.com/v1/badges/30293d7b8eb249f8d679/maintainability)](https://codeclimate.com/github/qutip/qutip-qtrl/maintainability)
+[![Coverage Status](https://coveralls.io/repos/github/qutip/qutip-qtrl/badge.svg)](https://coveralls.io/github/qutip/qutip-qtrl)
+
 The qutip-qtrl package used to be a module ``qutip.control`` under [QuTiP (Quantum Toolbox in Python)](http://qutip.org/index.html).
 From QuTiP 5.0, the community has decided to decrease the size of the core QuTiP package by reducing the external dependencies, in order to simplify maintenance.
 Hence a few modules are separated from the core QuTiP and will become QuTiP family packages.
