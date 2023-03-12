@@ -567,9 +567,7 @@ def grape_unitary_adaptive(
         dt = times[1] - times[0]
 
         def _H_idx(r, idx, k):
-            return H0 + sum(
-                [u[r, j, idx, k] * H_ops[j] for j in range(J)]
-            )
+            return H0 + sum([u[r, j, idx, k] * H_ops[j] for j in range(J)])
 
         if use_interp:
             ip_funcs = [
@@ -593,8 +591,10 @@ def grape_unitary_adaptive(
             ]
 
         else:
-
-            U_list = [(-1j * _H_idx(r, idx, best_k) * dt).expm() for idx in range(M - 1)]
+            U_list = [
+                (-1j * _H_idx(r, idx, best_k) * dt).expm()
+                for idx in range(M - 1)
+            ]
 
         logger.debug("Time 1: %fs" % (time.time() - _t0))
         _t0 = time.time()
@@ -651,8 +651,10 @@ def grape_unitary_adaptive(
         _t0 = time.time()
 
         for k, eps_val in enumerate(eps_vec):
-
-            U_list = [(-1j * _H_idx(r + 1, idx, k) * dt).expm() for idx in range(M - 1)]
+            U_list = [
+                (-1j * _H_idx(r + 1, idx, k) * dt).expm()
+                for idx in range(M - 1)
+            ]
 
             Uf[k] = qeye(U.dims[0])
             for m in range(M - 1):
