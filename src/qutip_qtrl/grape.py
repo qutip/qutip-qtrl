@@ -14,9 +14,9 @@ import warnings
 import time
 import numpy as np
 from scipy.interpolate import interp1d
-import scipy.sparse as sp
 
-from qutip import Qobj
+from qutip import Qobj, qeye
+from qutip.core import data as _data
 from qutip.ui.progressbar import BaseProgressBar
 from qutip_qtrl.cy_grape import cy_overlap, cy_grape_inner
 
@@ -207,18 +207,18 @@ def grape_unitary(
         U_f_list = []
         U_b_list = []
 
-        U_f = 1
-        U_b = 1
+        U_f = qeye(U.dims[0])
+        U_b = qeye(U.dims[0])
         for n in range(M - 1):
-            U_f = U_list[n] * U_f
+            U_f = U_list[n] @ U_f
             U_f_list.append(U_f)
             U_b_list.insert(0, U_b)
-            U_b = U_list[M - 2 - n].dag() * U_b
+            U_b = U_list[M - 2 - n].dag() @ U_b
 
         for j in range(J):
             for m in range(M - 1):
-                P = U_b_list[m] * U
-                Q = 1j * dt * H_ops[j] * U_f_list[m]
+                P = U_b_list[m] @ U
+                Q = 1j * dt * H_ops[j] @ U_f_list[m]
 
                 if phase_sensitive:
                     du = -_overlap(P, Q)
@@ -399,14 +399,14 @@ def cy_grape_unitary(
         U_f_list = []
         U_b_list = []
 
-        U_f = 1
-        U_b = sp.eye(*(U.shape))
+        U_f = qeye(U.dims[0]).data
+        U_b = qeye(U.dims[0]).data
         for n in range(M - 1):
-            U_f = U_list[n] * U_f
+            U_f = U_list[n] @ U_f
             U_f_list.append(U_f)
 
             U_b_list.insert(0, U_b)
-            U_b = U_list[M - 2 - n].T.conj().tocsr() * U_b
+            U_b = _data.adjoint(U_list[M - 2 - n]) @ U_b
 
         cy_grape_inner(
             U.data,
@@ -566,6 +566,11 @@ def grape_unitary_adaptive(
 
         dt = times[1] - times[0]
 
+        def _H_idx(r, idx, k):
+            return H0 + sum(
+                [u[r, j, idx, k] * H_ops[j] for j in range(J)]
+            )
+
         if use_interp:
             ip_funcs = [
                 interp1d(
@@ -589,12 +594,7 @@ def grape_unitary_adaptive(
 
         else:
 
-            def _H_idx(idx):
-                return H0 + sum(
-                    [u[r, j, idx, best_k] * H_ops[j] for j in range(J)]
-                )
-
-            U_list = [(-1j * _H_idx(idx) * dt).expm() for idx in range(M - 1)]
+            U_list = [(-1j * _H_idx(r, idx, best_k) * dt).expm() for idx in range(M - 1)]
 
         logger.debug("Time 1: %fs" % (time.time() - _t0))
         _t0 = time.time()
@@ -602,10 +602,10 @@ def grape_unitary_adaptive(
         U_f_list = []
         U_b_list = []
 
-        U_f = 1
-        U_b = 1
+        U_f = qeye(U.dims[0])
+        U_b = qeye(U.dims[0])
         for m in range(M - 1):
-            U_f = U_list[m] * U_f
+            U_f = U_list[m] @ U_f
             U_f_list.append(U_f)
 
             U_b_list.insert(0, U_b)
@@ -616,7 +616,7 @@ def grape_unitary_adaptive(
 
         for j in range(J):
             for m in range(M - 1):
-                P = U_b_list[m] * U
+                P = U_b_list[m] @ U
                 Q = 1j * dt * H_ops[j] * U_f_list[m]
 
                 if phase_sensitive:
@@ -652,16 +652,11 @@ def grape_unitary_adaptive(
 
         for k, eps_val in enumerate(eps_vec):
 
-            def _H_idx(idx):
-                return H0 + sum(
-                    [u[r + 1, j, idx, k] * H_ops[j] for j in range(J)]
-                )
+            U_list = [(-1j * _H_idx(r + 1, idx, k) * dt).expm() for idx in range(M - 1)]
 
-            U_list = [(-1j * _H_idx(idx) * dt).expm() for idx in range(M - 1)]
-
-            Uf[k] = 1
-            for U in U_list:
-                Uf[k] = U * Uf[k]
+            Uf[k] = qeye(U.dims[0])
+            for m in range(M - 1):
+                Uf[k] = U_list[m] @ Uf[k]
 
             _k_overlap[k] = _fidelity_function(
                 cy_overlap(Uf[k].data, U.data)
