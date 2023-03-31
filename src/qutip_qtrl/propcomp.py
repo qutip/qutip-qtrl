@@ -27,7 +27,7 @@ from qutip import Qobj
 from qutip_qtrl import errors
 
 # QuTiP logging
-import qutip.logging_utils as logging
+import qutip_qtrl.logging_utils as logging
 
 logger = logging.get_logger()
 
