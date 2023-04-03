@@ -74,7 +74,7 @@ import qutip_qtrl.dynamics as dynamics
 import qutip_qtrl.pulsegen as pulsegen
 import qutip_qtrl.dump as qtrldump
 
-import qutip.logging_utils as logging
+import qutip_qtrl.logging_utils as logging
 
 logger = logging.get_logger()
 

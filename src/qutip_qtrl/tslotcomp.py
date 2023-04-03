@@ -44,7 +44,7 @@ import qutip_qtrl.errors as errors
 import qutip_qtrl.dump as qtrldump
 
 # QuTiP logging
-import qutip.logging_utils as logging
+import qutip_qtrl.logging_utils as logging
 
 logger = logging.get_logger()
 

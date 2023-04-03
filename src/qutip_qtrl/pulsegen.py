@@ -17,7 +17,7 @@ import numpy as np
 import qutip_qtrl.dynamics as dynamics
 import qutip_qtrl.errors as errors
 
-import qutip.logging_utils as logging
+import qutip_qtrl.logging_utils as logging
 
 logger = logging.get_logger()
 
