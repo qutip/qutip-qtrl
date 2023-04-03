@@ -20,7 +20,7 @@ WARN = logging.WARN
 ERROR = logging.ERROR
 CRITICAL = logging.CRITICAL
 
-__all__ = ['get_logger']
+__all__ = ["get_logger"]
 
 # META-LOGGING
 
@@ -29,6 +29,7 @@ metalogger.addHandler(logging.NullHandler())
 
 
 # FUNCTIONS
+
 
 def get_logger(name=None):
     """
@@ -53,26 +54,29 @@ def get_logger(name=None):
         try:
             calling_frame = inspect.stack()[1][0]
             calling_module = inspect.getmodule(calling_frame)
-            name = (calling_module.__name__
-                    if calling_module is not None else '<none>')
+            name = (
+                calling_module.__name__
+                if calling_module is not None
+                else "<none>"
+            )
 
         except Exception:
-            metalogger.warn('Error creating logger.', exc_info=1)
-            name = '<unknown>'
+            metalogger.warn("Error creating logger.", exc_info=1)
+            name = "<unknown>"
 
     logger = logging.getLogger(name)
 
     policy = settings.log_handler
 
-    if policy == 'default':
+    if policy == "default":
         # Let's try to see if we're in IPython mode.
-        policy = 'basic' if settings.ipython else 'stream'
+        policy = "basic" if settings.ipython else "stream"
 
-    metalogger.debug("Creating logger for {} with policy {}.".format(
-        name, policy
-    ))
+    metalogger.debug(
+        "Creating logger for {} with policy {}.".format(name, policy)
+    )
 
-    if policy == 'basic':
+    if policy == "basic":
         # Add no handlers, just let basicConfig do it all.
         # This is nice for working with IPython, since
         # it will use its own handlers instead of our StreamHandler
@@ -82,11 +86,12 @@ def get_logger(name=None):
         else:
             logging.basicConfig()
 
-    elif policy == 'stream':
+    elif policy == "stream":
         formatter = logging.Formatter(
-            '[%(asctime)s] %(name)s[%(process)s]: '
-            '%(funcName)s: %(levelname)s: %(message)s',
-            '%Y-%m-%d %H:%M:%S')
+            "[%(asctime)s] %(name)s[%(process)s]: "
+            "%(funcName)s: %(levelname)s: %(message)s",
+            "%Y-%m-%d %H:%M:%S",
+        )
         handler = logging.StreamHandler()
         handler.setFormatter(formatter)
         logger.addHandler(handler)
@@ -94,7 +99,7 @@ def get_logger(name=None):
         # We're handling things here, so no propagation out.
         logger.propagate = False
 
-    elif policy == 'null':
+    elif policy == "null":
         # We need to add a NullHandler so that debugging works
         # at all, but this policy leaves it to the user to
         # make their own handlers. This is particularly useful
