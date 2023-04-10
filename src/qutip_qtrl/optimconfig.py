@@ -12,9 +12,9 @@ Configuration parameters for control pulse optimisation
 import numpy as np
 
 # QuTiP logging
-import qutip.logging_utils
+import qutip_qtrl.logging_utils
 
-logger = qutip.logging_utils.get_logger("qutip.control.optimconfig")
+logger = qutip_qtrl.logging_utils.get_logger("qutip.control.optimconfig")
 import qutip_qtrl.io as qtrlio
 
 
@@ -26,7 +26,7 @@ class OptimConfig(object):
     ----------
     log_level : integer
         level of messaging output from the logger.
-        Options are attributes of qutip.logging_utils,
+        Options are attributes of qutip_qtrl.logging_utils,
         in decreasing levels of messaging, are:
         DEBUG_INTENSE, DEBUG_VERBOSE, DEBUG, INFO, WARN, ERROR, CRITICAL
         Anything WARN or above is effectively 'quiet' execution,
