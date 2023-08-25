@@ -142,7 +142,7 @@ def grape_unitary(
         with GRAPE, a time-dependent Hamiltonian that is defined by the
         control pulses, as well as the resulting propagator.
     """
-    progress_bar = progress_bar or BaseProgressBar()
+    progress_bar = progress_bar or BaseProgressBar(R)
     if eps is None:
         eps = 0.1 * (2 * np.pi) / (times[-1])
 
@@ -170,9 +170,8 @@ def grape_unitary(
     if beta:
         warnings.warn("Causion: Using experimental feature time-penalty")
 
-    progress_bar.start(R)
     for r in range(R - 1):
-        progress_bar.update(r)
+        progress_bar.update()
 
         dt = times[1] - times[0]
 
@@ -359,9 +358,8 @@ def cy_grape_unitary(
     alpha_val = alpha if alpha else 0.0
     beta_val = beta if beta else 0.0
 
-    progress_bar.start(R)
     for r in range(R - 1):
-        progress_bar.update(r)
+        progress_bar.update()
 
         dt = times[1] - times[0]
 
@@ -500,7 +498,7 @@ def grape_unitary_adaptive(
         with GRAPE, a time-dependent Hamiltonian that is defined by the
         control pulses, as well as the resulting propagator.
     """
-    progress_bar = progress_bar or BaseProgressBar()
+    progress_bar = progress_bar or BaseProgressBar(R)
 
     if eps is None:
         eps = 0.1 * (2 * np.pi) / (times[-1])
@@ -553,9 +551,8 @@ def grape_unitary_adaptive(
     _r = 0
     _prev_overlap = 0
 
-    progress_bar.start(R)
     for r in range(R - 1):
-        progress_bar.update(r)
+        progress_bar.update()
 
         _r = r
         eps_log[r] = eps_vec[best_k]
