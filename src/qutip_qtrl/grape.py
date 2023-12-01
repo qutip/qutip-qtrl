@@ -315,7 +315,7 @@ def cy_grape_unitary(
         with GRAPE, a time-dependent Hamiltonian that is defined by the
         control pulses, as well as the resulting propagator.
     """
-    progress_bar = progress_bar or BaseProgressBar()
+    progress_bar = progress_bar or BaseProgressBar(R)
 
     if eps is None:
         eps = 0.1 * (2 * np.pi) / (times[-1])
