@@ -11,7 +11,7 @@ Bug Fixes
 ---------
 
 - Fixed progress bar initialization and usage (#13, #15, Patrick Hopf).
-- Replaced the logging utilities that were removed from QuTiP v5 with a vendored copy in this package (#9, Èric Giguere).
+- Replaced the logging utilities that were removed from QuTiP v5 with a vendored copy in this package (#9, #10, Èric Giguere, Boxi Li).
 - Applied black to setup.py and doc/conf.py scripts (#8, Simon Cross).
 
 
