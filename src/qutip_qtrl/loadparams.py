@@ -19,7 +19,7 @@ from configparser import ConfigParser
 
 # QuTiP logging
 from qutip import Qobj
-import qutip.logging_utils as logging
+import qutip_qtrl.logging_utils as logging
 
 logger = logging.get_logger()
 
