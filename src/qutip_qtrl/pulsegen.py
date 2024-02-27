@@ -848,7 +848,7 @@ class PulseGenTriangle(PulseGenPeriodic):
         self, num_waves=None, wavelen=None, freq=None, start_phase=None
     ):
         """
-        Generate a sine wave pulse
+        Generate a triangular wave pulse
         If no parameters are pavided then the class object attributes are used.
         If they are provided, then these will reinitialise the object attribs
         """
