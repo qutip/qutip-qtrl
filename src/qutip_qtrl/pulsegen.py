@@ -988,10 +988,11 @@ class PulseGenCrab(PulseGen):
         when initialised, otherwise they will all be equal to self.scaling
     """
 
-    def __init__(self, dyn=None, num_coeffs=None, params=None):
+    def __init__(self, dyn=None, num_coeffs=None, params=None, fix_freqs=True):
         self.parent = dyn
         self.num_coeffs = num_coeffs
         self.params = params
+        self.fix_freqs = fix_freqs
         self.reset()
 
     def reset(self):
@@ -1007,7 +1008,7 @@ class PulseGenCrab(PulseGen):
 
         self._uses_time = True
         self.time = None
-        self.num_basis_funcs = 2
+        self.num_basis_funcs = 2 if self.fix_freqs else 3
         self.num_optim_vars = 0
         self.coeffs = None
         self.randomize_coeffs = True
@@ -1289,7 +1290,10 @@ class PulseGenCrabFourier(PulseGenCrab):
         pulse = np.zeros(self.num_tslots)
 
         for i in range(self.num_coeffs):
-            phase = self.freqs[i] * self.time
+            if self.fix_freqs:
+                phase = self.freqs[i] * self.time
+            else: # optimise frequencies as part of the parameters
+                phase = self.coeffs[i, 2] * self.time
             pulse += self.coeffs[i, 0] * np.sin(phase) + self.coeffs[
                 i, 1
             ] * np.cos(phase)

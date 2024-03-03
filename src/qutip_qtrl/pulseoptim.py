@@ -2042,7 +2042,8 @@ def create_pulse_optimizer(
         optim.pulse_generator = []
         for j in range(n_ctrls):
             crab_pgen = pulsegen.PulseGenCrabFourier(
-                dyn=dyn, num_coeffs=num_coeffs
+                dyn=dyn, num_coeffs=num_coeffs,
+                fix_freqs=alg_params.get("fix_frequency", True)
             )
             if init_coeff_scaling is not None:
                 crab_pgen.scaling = init_coeff_scaling
