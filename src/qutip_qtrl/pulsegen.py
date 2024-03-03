@@ -1292,7 +1292,7 @@ class PulseGenCrabFourier(PulseGenCrab):
         for i in range(self.num_coeffs):
             if self.fix_freqs:
                 phase = self.freqs[i] * self.time
-            else: # optimise frequencies as part of the parameters
+            else:  # optimise frequencies as part of the parameters
                 phase = self.coeffs[i, 2] * self.time
             pulse += self.coeffs[i, 0] * np.sin(phase) + self.coeffs[
                 i, 1
