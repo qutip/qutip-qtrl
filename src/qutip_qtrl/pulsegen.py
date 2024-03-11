@@ -1067,6 +1067,10 @@ class PulseGenCrab(PulseGen):
                 self.num_coeffs = self.DEF_NUM_COEFFS
         self.num_optim_vars = self.num_coeffs * self.num_basis_funcs
 
+        # Only generate coefficients if they have not been set yet
+        if self.coeffs is not None:
+            return
+
         if self._num_coeffs_estimated:
             if self.log_level <= logging.INFO:
                 logger.info(
