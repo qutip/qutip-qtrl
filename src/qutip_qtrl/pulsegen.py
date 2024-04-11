@@ -986,6 +986,12 @@ class PulseGenCrab(PulseGen):
     randomize_coeffs : bool
         If True (default) then the coefficients are set to some random values
         when initialised, otherwise they will all be equal to self.scaling
+
+    fix_freqs : bool
+        If True (default) then the frequencies of the basis functions are fixed
+        and the number of basis functions is set to 2. Otherwise the
+        frequencies are also optimised and the number of basis functions
+        becomes 3.
     """
 
     def __init__(self, dyn=None, num_coeffs=None, params=None, fix_freqs=True):
@@ -1294,7 +1300,7 @@ class PulseGenCrabFourier(PulseGenCrab):
         pulse = np.zeros(self.num_tslots)
 
         for i in range(self.num_coeffs):
-            if self.fix_freqs:
+            if self.fix_freqs: # dont optimise frequencies
                 phase = self.freqs[i] * self.time
             else:  # optimise frequencies as part of the parameters
                 phase = self.coeffs[i, 2] * self.time
