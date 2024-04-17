@@ -667,3 +667,26 @@ class TestTimeDependence:
             np.testing.assert_allclose(
                 result.initial_amps[k], result.final_amps[k], rtol=1e-9
             )
+
+
+def test_init_pulsegencrab():
+    """
+    Test the initialization of CRAB Fourier parameters
+    """
+    # Setup pulse generator
+    config = qutip_qtrl.optimconfig.OptimConfig()
+    dyn = cpo.dynamics.Dynamics(config)
+    crab_pgen = cpo.pulsegen.PulseGenCrabFourier(
+        dyn=dyn,
+        num_coeffs=1,
+        fix_freqs=False,
+    )
+    # Initialize pulsegenerator
+    vals = np.array([1, 1, 1])
+    crab_pgen.init_pulse(init_param_vals=vals)
+    init_amps = crab_pgen.gen_pulse()
+    # Check initial pulse
+    pulse = vals[0] * np.sin(vals[2] * crab_pgen.time) + vals[1] * np.cos(
+        vals[2] * crab_pgen.time
+    )
+    assert np.isclose(init_amps, pulse).all()
