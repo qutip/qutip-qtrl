@@ -1017,13 +1017,13 @@ class PulseGenCrab(PulseGen):
         self.guess_pulse_func = None
         self.apply_params()
 
-    def init_pulse(self, num_coeffs=None, init_param_vals=None):
+    def init_pulse(self, num_coeffs=None, init_coeffs=None):
         """
         Set the initial freq and coefficient values
         """
         PulseGen.init_pulse(self)
         self.init_coeffs(
-            num_coeffs=num_coeffs, init_param_vals=init_param_vals
+            num_coeffs=num_coeffs, init_coeffs=init_coeffs
         )
 
         if self.guess_pulse is not None:
@@ -1044,7 +1044,7 @@ class PulseGenCrab(PulseGen):
     #            self.guess_pulse = self.guess_pulsegen.gen_pulse()
     #        return self.guess_pulse
 
-    def init_coeffs(self, num_coeffs=None, init_param_vals=None):
+    def init_coeffs(self, num_coeffs=None, init_coeffs=None):
         """
         Generate or set the initial ceofficent values.
 
@@ -1054,7 +1054,7 @@ class PulseGenCrab(PulseGen):
             Number of coefficients used for each basis function
             If given this overides the default and sets the attribute
             of the same name.
-        init_param_vals : float array[num_coeffs * num_basis_funcs]
+        init_coeffs : float array[num_coeffs * num_basis_funcs]
             Typically this will be the initial basis coefficients.
         """
         if num_coeffs:
@@ -1091,8 +1091,8 @@ class PulseGenCrab(PulseGen):
                             self.num_coeffs, self.NUM_COEFFS_WARN_LVL
                         )
                     )
-        if init_param_vals is not None:
-            self.set_coeffs(init_param_vals)
+        if init_coeffs is not None:
+            self.set_coeffs(init_coeffs)
         elif self.randomize_coeffs:
             r = np.random.random([self.num_coeffs, self.num_basis_funcs])
             self.coeffs = (2 * r - 1.0) * self.scaling
@@ -1263,12 +1263,12 @@ class PulseGenCrabFourier(PulseGenCrab):
         self.freqs = None
         self.randomize_freqs = True
 
-    def init_pulse(self, num_coeffs=None, init_param_vals=None):
+    def init_pulse(self, num_coeffs=None, init_coeffs=None):
         """
         Set the initial freq and coefficient values
         """
         PulseGenCrab.init_pulse(
-            self, num_coeffs=num_coeffs, init_param_vals=init_param_vals
+            self, num_coeffs=num_coeffs, init_coeffs=init_coeffs
         )
 
         self.init_freqs()

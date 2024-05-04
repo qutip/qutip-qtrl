@@ -431,7 +431,7 @@ class TestOptimization:
         for i, pgen in enumerate(optimizer.pulse_generator):
             num_coeffs = 8
             vals = np.ones(num_coeffs * pgen.num_basis_funcs)
-            pgen.init_pulse(num_coeffs, init_param_vals=vals)
+            pgen.init_pulse(num_coeffs, init_coeffs=vals)
             init_amps[:, i] = pgen.gen_pulse()
 
         # Initialize the dynamics with the initial amplitudes
