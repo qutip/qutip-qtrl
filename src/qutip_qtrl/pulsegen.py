@@ -1022,9 +1022,7 @@ class PulseGenCrab(PulseGen):
         Set the initial freq and coefficient values
         """
         PulseGen.init_pulse(self)
-        self.init_coeffs(
-            num_coeffs=num_coeffs, init_coeffs=init_coeffs
-        )
+        self.init_coeffs(num_coeffs=num_coeffs, init_coeffs=init_coeffs)
 
         if self.guess_pulse is not None:
             self.init_guess_pulse()
