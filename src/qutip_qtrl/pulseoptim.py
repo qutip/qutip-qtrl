@@ -2020,9 +2020,11 @@ def create_pulse_optimizer(
         # Create a pulse generator for each ctrl
         crab_pulse_params = None
         num_coeffs = None
+        fix_freqs = True
         init_coeff_scaling = None
         if isinstance(alg_params, dict):
             num_coeffs = alg_params.get("num_coeffs")
+            fix_freqs = alg_params.get("fix_frequency")
             init_coeff_scaling = alg_params.get("init_coeff_scaling")
             if "crab_pulse_params" in alg_params:
                 crab_pulse_params = alg_params.get("crab_pulse_params")
@@ -2044,7 +2046,7 @@ def create_pulse_optimizer(
             crab_pgen = pulsegen.PulseGenCrabFourier(
                 dyn=dyn,
                 num_coeffs=num_coeffs,
-                fix_freqs=alg_params.get("fix_frequency", True),
+                fix_freqs=fix_freqs,
             )
             if init_coeff_scaling is not None:
                 crab_pgen.scaling = init_coeff_scaling

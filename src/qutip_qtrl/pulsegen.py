@@ -1267,7 +1267,9 @@ class PulseGenCrabFourier(PulseGenCrab):
         """
         Set the initial freq and coefficient values
         """
-        PulseGenCrab.init_pulse(self, init_param_vals=init_param_vals)
+        PulseGenCrab.init_pulse(
+            self, num_coeffs=num_coeffs, init_param_vals=init_param_vals
+        )
 
         self.init_freqs()
 
