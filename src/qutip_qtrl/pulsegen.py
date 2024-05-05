@@ -1054,6 +1054,7 @@ class PulseGenCrab(PulseGen):
             of the same name.
         init_coeffs : float array[num_coeffs * num_basis_funcs]
             Typically this will be the initial basis coefficients.
+            If set to `None` (the default), the initial coefficients will be automatically generated.
         """
         if num_coeffs:
             self.num_coeffs = num_coeffs
