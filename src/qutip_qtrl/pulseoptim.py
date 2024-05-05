@@ -2024,7 +2024,7 @@ def create_pulse_optimizer(
         init_coeff_scaling = None
         if isinstance(alg_params, dict):
             num_coeffs = alg_params.get("num_coeffs")
-            fix_freqs = alg_params.get("fix_frequency")
+            fix_freqs = alg_params.get("fix_frequency", True)
             init_coeff_scaling = alg_params.get("init_coeff_scaling")
             if "crab_pulse_params" in alg_params:
                 crab_pulse_params = alg_params.get("crab_pulse_params")
