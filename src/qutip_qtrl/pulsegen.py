@@ -1017,12 +1017,12 @@ class PulseGenCrab(PulseGen):
         self.guess_pulse_func = None
         self.apply_params()
 
-    def init_pulse(self, num_coeffs=None):
+    def init_pulse(self, num_coeffs=None, init_coeffs=None):
         """
         Set the initial freq and coefficient values
         """
         PulseGen.init_pulse(self)
-        self.init_coeffs(num_coeffs=num_coeffs)
+        self.init_coeffs(num_coeffs=num_coeffs, init_coeffs=init_coeffs)
 
         if self.guess_pulse is not None:
             self.init_guess_pulse()
@@ -1042,9 +1042,9 @@ class PulseGenCrab(PulseGen):
     #            self.guess_pulse = self.guess_pulsegen.gen_pulse()
     #        return self.guess_pulse
 
-    def init_coeffs(self, num_coeffs=None):
+    def init_coeffs(self, num_coeffs=None, init_coeffs=None):
         """
-        Generate the initial ceofficent values.
+        Generate or set the initial ceofficent values.
 
         Parameters
         ----------
@@ -1052,6 +1052,9 @@ class PulseGenCrab(PulseGen):
             Number of coefficients used for each basis function
             If given this overides the default and sets the attribute
             of the same name.
+        init_coeffs : float array[num_coeffs * num_basis_funcs]
+            Typically this will be the initial basis coefficients.
+            If set to `None` (the default), the initial coefficients will be automatically generated.
         """
         if num_coeffs:
             self.num_coeffs = num_coeffs
@@ -1087,8 +1090,9 @@ class PulseGenCrab(PulseGen):
                             self.num_coeffs, self.NUM_COEFFS_WARN_LVL
                         )
                     )
-
-        if self.randomize_coeffs:
+        if init_coeffs is not None:
+            self.set_coeffs(init_coeffs)
+        elif self.randomize_coeffs:
             r = np.random.random([self.num_coeffs, self.num_basis_funcs])
             self.coeffs = (2 * r - 1.0) * self.scaling
         else:
@@ -1236,7 +1240,19 @@ class PulseGenCrabFourier(PulseGenCrab):
         Frequencies for the basis functions
     randomize_freqs : bool
         If True (default) the some random offset is applied to the frequencies
+    fix_freqs : bool
+        If True (default) then the frequencies of the basis functions are fixed
+        and the number of basis functions is set to 2 (sin and cos).
+        If False then the frequencies are also optimised, adding an additional
+        parameter for each pair of basis functions.
     """
+
+    def __init__(self, dyn=None, num_coeffs=None, params=None, fix_freqs=True):
+        PulseGenCrab.__init__(self, dyn, num_coeffs, params)
+        self.fix_freqs = fix_freqs
+        if not self.fix_freqs:
+            # additional parameter for the frequency
+            self.num_basis_funcs += 1
 
     def reset(self):
         """
@@ -1246,11 +1262,13 @@ class PulseGenCrabFourier(PulseGenCrab):
         self.freqs = None
         self.randomize_freqs = True
 
-    def init_pulse(self, num_coeffs=None):
+    def init_pulse(self, num_coeffs=None, init_coeffs=None):
         """
         Set the initial freq and coefficient values
         """
-        PulseGenCrab.init_pulse(self)
+        PulseGenCrab.init_pulse(
+            self, num_coeffs=num_coeffs, init_coeffs=init_coeffs
+        )
 
         self.init_freqs()
 
@@ -1289,7 +1307,10 @@ class PulseGenCrabFourier(PulseGenCrab):
         pulse = np.zeros(self.num_tslots)
 
         for i in range(self.num_coeffs):
-            phase = self.freqs[i] * self.time
+            if self.fix_freqs:  # dont optimise frequencies
+                phase = self.freqs[i] * self.time
+            else:  # optimise frequencies as part of the parameters
+                phase = self.coeffs[i, 2] * self.time
             pulse += self.coeffs[i, 0] * np.sin(phase) + self.coeffs[
                 i, 1
             ] * np.cos(phase)
