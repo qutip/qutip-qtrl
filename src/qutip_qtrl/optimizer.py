@@ -484,7 +484,7 @@ class Optimizer(object):
                 val = params[key]
                 if hasattr(self, key):
                     setattr(self, key, val)
-                if hasattr(self.termination_conditions, key):
+                elif hasattr(self.termination_conditions, key):
                     setattr(self.termination_conditions, key, val)
                 else:
                     unused_params[key] = val
