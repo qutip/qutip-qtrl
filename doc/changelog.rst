@@ -2,6 +2,29 @@
 Changelog
 *********
 
+Version 0.1.2 (June 11, 2024)
++++++++++++++++++++++++++++++
+
+This is a patch release of qutip-qtrl that provides updates to support the QuTiP-QOC 0.1.0.b0 release.
+
+Miscellaneous
+-------------
+
+- Fix a typo in PulseGenTriangle.gen_pulse docs (#17, Huai-Ming Yu).
+
+
+Features
+--------
+
+- Add frequencies as optional CRAB parameter (#18 Patrick Hopf).
+
+
+Bug Fixes
+---------
+
+- Bugfix for method_params (#19, Patrick Hopf).
+
+
 Version 0.1.1 (February 12, 2024)
 +++++++++++++++++++++++++++++++++
 
