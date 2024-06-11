@@ -410,6 +410,40 @@ class TestOptimization:
         assert abs(result.fid_err) < tol
         assert abs(result.final_amps[0, 0]) < tol, "Lead-in amplitude nonzero."
 
+    def test_init_pulsegencrab(self, system, propagation):
+        """
+        Test the initialization of CRAB Fourier parameters
+        """
+        # Setup the optimizer
+        system = _merge_kwargs(system, propagation)
+        optimizer = cpo.create_pulse_optimizer(
+            system.system,
+            system.controls,
+            system.initial,
+            system.target,
+            alg="CRAB",
+            **system.kwargs,
+        )
+        dynamics = optimizer.dynamics
+
+        init_amps = np.zeros([dynamics.num_tslots, dynamics.num_ctrls])
+        # Generate initial pulses for each control through generator
+        for i, pgen in enumerate(optimizer.pulse_generator):
+            num_coeffs = 8
+            vals = np.ones(num_coeffs * pgen.num_basis_funcs)
+            pgen.init_pulse(num_coeffs, init_coeffs=vals)
+            init_amps[:, i] = pgen.gen_pulse()
+
+        # Initialize the dynamics with the initial amplitudes
+        dynamics.initialize_controls(init_amps)
+
+        # Run the optimization
+        result = optimizer.run_optimization()
+        assert isinstance(result.fid_err, float)
+
+        # Check proper initialization of CRAB amplitudes
+        assert np.isclose(result.initial_amps, init_amps).all()
+
 
 # The full object-orientated interface to the optimiser is rather complex.  To
 # attempt to simplify the test of the configuration loading, we break it down
