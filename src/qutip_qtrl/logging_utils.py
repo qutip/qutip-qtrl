@@ -66,7 +66,7 @@ def get_logger(name=None):
 
     logger = logging.getLogger(name)
 
-    policy = settings.log_handler
+    policy = settings._log_handler
 
     if policy == "default":
         # Let's try to see if we're in IPython mode.
