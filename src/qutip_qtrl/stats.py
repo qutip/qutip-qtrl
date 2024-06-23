@@ -151,21 +151,21 @@ class Stats(object):
                 self.num_ctrl_amp_updates / float(self.num_iter)
             )
         except Exception:
-            self.mean_num_ctrl_amp_updates_per_iter = np.NaN
+            self.mean_num_ctrl_amp_updates_per_iter = np.nan
 
         try:
             self.mean_num_timeslot_changes_per_update = (
                 self.num_timeslot_changes / float(self.num_ctrl_amp_updates)
             )
         except Exception:
-            self.mean_num_timeslot_changes_per_update = np.NaN
+            self.mean_num_timeslot_changes_per_update = np.nan
 
         try:
             self.mean_num_ctrl_amp_changes_per_update = (
                 self.num_ctrl_amp_changes / float(self.num_ctrl_amp_updates)
             )
         except Exception:
-            self.mean_num_ctrl_amp_changes_per_update = np.NaN
+            self.mean_num_ctrl_amp_changes_per_update = np.nan
 
     def _format_datetime(self, t, tot=0.0):
         dtStr = str(datetime.timedelta(seconds=t))
