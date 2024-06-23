@@ -81,7 +81,7 @@ def get_logger(name=None):
         # This is nice for working with IPython, since
         # it will use its own handlers instead of our StreamHandler
         # below.
-        if settings.debug:
+        if settings._debug:
             logging.basicConfig(level=logging.DEBUG)
         else:
             logging.basicConfig()
@@ -106,7 +106,7 @@ def get_logger(name=None):
         # for capturing to logfiles.
         logger.addHandler(logging.NullHandler())
 
-    if settings.debug:
+    if settings._debug:
         logger.setLevel(logging.DEBUG)
     else:
         logger.setLevel(logging.WARN)
