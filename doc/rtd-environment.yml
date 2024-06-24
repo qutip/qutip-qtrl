@@ -14,5 +14,5 @@ dependencies:
 - wheel==0.38.4
 - pip
 - pip:
-  - qutip==5.0.0a1
+  - qutip==5.0.1
   - ..[full]
