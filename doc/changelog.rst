@@ -2,6 +2,18 @@
 Changelog
 *********
 
+Version 0.1.3 (June 24, 2024)
++++++++++++++++++++++++++++++
+
+This patch fixes some conflicts due to changes in QuTiP v5.
+No Python 3.8 support any more.
+
+Miscellaneous
+-------------
+
+- Integrate qutip v5 changes (#23, Patrick Hopf).
+
+
 Version 0.1.2 (June 11, 2024)
 +++++++++++++++++++++++++++++
 
