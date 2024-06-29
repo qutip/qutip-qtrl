@@ -622,7 +622,7 @@ class FidCompTraceDiff(FidelityComputer):
                 )
 
             if np.isnan(self.fid_err):
-                self.fid_err = np.Inf
+                self.fid_err = np.inf
 
             if dyn.stats is not None:
                 dyn.stats.num_fidelity_computes += 1
@@ -707,7 +707,7 @@ class FidCompTraceDiff(FidelityComputer):
                         * np.real(_trace(evo_f_diff.conj().T.dot(evo_grad)))
                     )
                 if np.isnan(g):
-                    g = np.Inf
+                    g = np.inf
 
                 grad[k, j] = g
         if dyn.stats is not None:
@@ -786,7 +786,7 @@ class FidCompTraceDiffApprox(FidCompTraceDiff):
 
                 g = (fid_err_eps - curr_fid_err) / self.epsilon
                 if np.isnan(g):
-                    g = np.Inf
+                    g = np.inf
 
                 grad[k, j] = g
 
