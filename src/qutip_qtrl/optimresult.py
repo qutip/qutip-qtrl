@@ -84,8 +84,8 @@ class OptimResult(object):
 
     def reset(self):
         self.fidelity = 0.0
-        self.initial_fid_err = np.Inf
-        self.fid_err = np.Inf
+        self.initial_fid_err = np.inf
+        self.fid_err = np.inf
         self.goal_achieved = False
         self.grad_norm_final = 0.0
         self.grad_norm_min_reached = False
