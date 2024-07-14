@@ -11,7 +11,6 @@ data dumping.
 import os
 import copy
 import numpy as np
-from numpy.compat import asbytes
 
 # QuTiP control modules
 import qutip_qtrl.io as qtrlio
@@ -429,7 +428,7 @@ class OptimDump(Dump):
             for ois in self.iter_summary:
                 if ois.idx == 0:
                     fs.write(
-                        asbytes(
+                        str.encode(
                             "{}\n{}\n".format(
                                 ois.get_header_line(self.summary_sep),
                                 ois.get_value_line(self.summary_sep),
@@ -438,7 +437,7 @@ class OptimDump(Dump):
                     )
                 else:
                     fs.write(
-                        asbytes(
+                        str.encode(
                             "{}\n".format(ois.get_value_line(self.summary_sep))
                         )
                     )
@@ -451,14 +450,14 @@ class OptimDump(Dump):
 
         if self.dump_fid_err:
             if fall:
-                fall.write(asbytes("Fidelity errors:\n"))
+                fall.write(str.encode("Fidelity errors:\n"))
                 np.savetxt(fall, self.fid_err_log)
             else:
                 np.savetxt(self.fid_err_file, self.fid_err_log)
 
         if self.dump_grad_norm:
             if fall:
-                fall.write(asbytes("gradients norms:\n"))
+                fall.write(str.encode("gradients norms:\n"))
                 np.savetxt(fall, self.grad_norm_log)
             else:
                 np.savetxt(self.grad_norm_file, self.grad_norm_log)
@@ -468,7 +467,7 @@ class OptimDump(Dump):
             for grad in self.grad_log:
                 g_num += 1
                 if fall:
-                    fall.write(asbytes("gradients (call {}):\n".format(g_num)))
+                    fall.write(str.encode("gradients (call {}):\n".format(g_num)))
                     np.savetxt(fall, grad)
                 else:
                     fname = "{}-fid_err_gradients{}.{}".format(
@@ -709,7 +708,7 @@ class DynamicsDump(Dump):
             for ecs in self.evo_summary:
                 if ecs.idx == 0:
                     fs.write(
-                        asbytes(
+                        str.encode(
                             "{}\n{}\n".format(
                                 ecs.get_header_line(self.summary_sep),
                                 ecs.get_value_line(self.summary_sep),
@@ -718,7 +717,7 @@ class DynamicsDump(Dump):
                     )
                 else:
                     fs.write(
-                        asbytes(
+                        str.encode(
                             "{}\n".format(ecs.get_value_line(self.summary_sep))
                         )
                     )
@@ -801,7 +800,7 @@ class EvoCompDumpItem(DumpItem):
             # write all to this stream
             fall = f
             closefall = False
-            f.write(asbytes("EVOLUTION COMPUTATION {}\n".format(self.idx)))
+            f.write(str.encode("EVOLUTION COMPUTATION {}\n".format(self.idx)))
         elif f:
             fall = open(f, "wb")
         else:
@@ -813,7 +812,7 @@ class EvoCompDumpItem(DumpItem):
         if self.ctrl_amps is not None:
             if fall:
                 f = fall
-                f.write(asbytes("Ctrl amps\n"))
+                f.write(str.encode("Ctrl amps\n"))
             else:
                 fname = "{}-ctrl_amps.{}".format(fnbase, dump.dump_file_ext)
                 f = open(os.path.join(dump.dump_dir, fname), "wb")
@@ -829,14 +828,14 @@ class EvoCompDumpItem(DumpItem):
             k = 0
             if fall:
                 f = fall
-                f.write(asbytes("Dynamics Generators\n"))
+                f.write(str.encode("Dynamics Generators\n"))
             else:
                 fname = "{}-dyn_gen.{}".format(fnbase, dump.dump_file_ext)
                 f = open(os.path.join(dump.dump_dir, fname), "wb")
                 closef = True
             for dg in self.dyn_gen:
                 f.write(
-                    asbytes("dynamics generator for timeslot {}\n".format(k))
+                    str.encode("dynamics generator for timeslot {}\n".format(k))
                 )
                 np.savetxt(f, self.dyn_gen[k], delimiter=dump.data_sep)
                 k += 1
@@ -848,13 +847,13 @@ class EvoCompDumpItem(DumpItem):
             k = 0
             if fall:
                 f = fall
-                f.write(asbytes("Propagators\n"))
+                f.write(str.encode("Propagators\n"))
             else:
                 fname = "{}-prop.{}".format(fnbase, dump.dump_file_ext)
                 f = open(os.path.join(dump.dump_dir, fname), "wb")
                 closef = True
             for dg in self.dyn_gen:
-                f.write(asbytes("Propagator for timeslot {}\n".format(k)))
+                f.write(str.encode("Propagator for timeslot {}\n".format(k)))
                 np.savetxt(f, self.prop[k], delimiter=dump.data_sep)
                 k += 1
             if closef:
@@ -865,7 +864,7 @@ class EvoCompDumpItem(DumpItem):
             k = 0
             if fall:
                 f = fall
-                f.write(asbytes("Propagator gradients\n"))
+                f.write(str.encode("Propagator gradients\n"))
             else:
                 fname = "{}-prop_grad.{}".format(fnbase, dump.dump_file_ext)
                 f = open(os.path.join(dump.dump_dir, fname), "wb")
@@ -873,7 +872,7 @@ class EvoCompDumpItem(DumpItem):
             for k in range(self.prop_grad.shape[0]):
                 for j in range(self.prop_grad.shape[1]):
                     f.write(
-                        asbytes(
+                        str.encode(
                             "Propagator gradient for timeslot {} "
                             "control {}\n".format(k, j)
                         )
@@ -889,13 +888,13 @@ class EvoCompDumpItem(DumpItem):
             k = 0
             if fall:
                 f = fall
-                f.write(asbytes("Forward evolution\n"))
+                f.write(str.encode("Forward evolution\n"))
             else:
                 fname = "{}-fwd_evo.{}".format(fnbase, dump.dump_file_ext)
                 f = open(os.path.join(dump.dump_dir, fname), "wb")
                 closef = True
             for dg in self.dyn_gen:
-                f.write(asbytes("Evolution from 0 to {}\n".format(k)))
+                f.write(str.encode("Evolution from 0 to {}\n".format(k)))
                 np.savetxt(f, self.fwd_evo[k], delimiter=dump.data_sep)
                 k += 1
             if closef:
@@ -906,13 +905,13 @@ class EvoCompDumpItem(DumpItem):
             k = 0
             if fall:
                 f = fall
-                f.write(asbytes("Onward evolution\n"))
+                f.write(str.encode("Onward evolution\n"))
             else:
                 fname = "{}-onwd_evo.{}".format(fnbase, dump.dump_file_ext)
                 f = open(os.path.join(dump.dump_dir, fname), "wb")
                 closef = True
             for dg in self.dyn_gen:
-                f.write(asbytes("Evolution from {} to end\n".format(k)))
+                f.write(str.encode("Evolution from {} to end\n".format(k)))
                 np.savetxt(f, self.fwd_evo[k], delimiter=dump.data_sep)
                 k += 1
             if closef:
@@ -923,13 +922,13 @@ class EvoCompDumpItem(DumpItem):
             k = 0
             if fall:
                 f = fall
-                f.write(asbytes("Onto evolution\n"))
+                f.write(str.encode("Onto evolution\n"))
             else:
                 fname = "{}-onto_evo.{}".format(fnbase, dump.dump_file_ext)
                 f = open(os.path.join(dump.dump_dir, fname), "wb")
                 closef = True
             for dg in self.dyn_gen:
-                f.write(asbytes("Evolution from {} onto target\n".format(k)))
+                f.write(str.encode("Evolution from {} onto target\n".format(k)))
                 np.savetxt(f, self.fwd_evo[k], delimiter=dump.data_sep)
                 k += 1
             if closef:
