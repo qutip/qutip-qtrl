@@ -467,7 +467,9 @@ class OptimDump(Dump):
             for grad in self.grad_log:
                 g_num += 1
                 if fall:
-                    fall.write(str.encode("gradients (call {}):\n".format(g_num)))
+                    fall.write(
+                        str.encode("gradients (call {}):\n".format(g_num))
+                    )
                     np.savetxt(fall, grad)
                 else:
                     fname = "{}-fid_err_gradients{}.{}".format(
@@ -835,7 +837,9 @@ class EvoCompDumpItem(DumpItem):
                 closef = True
             for dg in self.dyn_gen:
                 f.write(
-                    str.encode("dynamics generator for timeslot {}\n".format(k))
+                    str.encode(
+                        "dynamics generator for timeslot {}\n".format(k)
+                    )
                 )
                 np.savetxt(f, self.dyn_gen[k], delimiter=dump.data_sep)
                 k += 1
@@ -928,7 +932,9 @@ class EvoCompDumpItem(DumpItem):
                 f = open(os.path.join(dump.dump_dir, fname), "wb")
                 closef = True
             for dg in self.dyn_gen:
-                f.write(str.encode("Evolution from {} onto target\n".format(k)))
+                f.write(
+                    str.encode("Evolution from {} onto target\n".format(k))
+                )
                 np.savetxt(f, self.fwd_evo[k], delimiter=dump.data_sep)
                 k += 1
             if closef:
