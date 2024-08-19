@@ -610,7 +610,7 @@ def _count_waves(system):
     ],
 )
 class TestPeriodicControlFunction:
-    num_tslots = 1_000
+    num_tslots = 3_000
     evo_time = 10
 
     @pytest.mark.parametrize("n_waves", [1, 5, 10, 100])
