@@ -1556,7 +1556,7 @@ class DynamicsUnitary(Dynamics):
         else:
             self.tslot_computer = tslotcomp.TSlotCompUpdateAll(self)
         # set the default fidelity computer
-        self.fid_computer = fidcomp.FidCompUnitary(self)
+        self.fid_computer = fidcomp.FidCompUnitary(self) # We set the fid computer to use here
         # set the default propagator computer
         self.prop_computer = propcomp.PropCompDiag(self)
 

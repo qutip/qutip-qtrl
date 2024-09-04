@@ -28,7 +28,7 @@ in the class descriptions.
 import timeit
 import warnings
 import numpy as np
-
+import scipy as sp
 # QuTiP
 from qutip import Qobj
 
@@ -161,7 +161,8 @@ class FidelityComputer(object):
         self.fidelity_current = False
         self.fid_err_grad_current = False
         self.grad_norm = 0.0
-
+    
+    # ADD PARAMS HERE? # 
     def apply_params(self, params=None):
         """
         Set object attributes based on the dictionary (if any) passed in the
@@ -318,6 +319,9 @@ class FidCompUnitary(FidelityComputer):
         self._init_phase_option(value)
 
     def _init_phase_option(self, value):
+        """
+        based on phase option (SU or PSU), set the normalization function.
+        """
         self._phase_option = value
         if value == "PSU":
             self.fid_norm_func = self.normalize_PSU
@@ -334,6 +338,7 @@ class FidCompUnitary(FidelityComputer):
             raise errors.UsageError(
                 "No option for phase_option '{}'".format(value)
             )
+
 
     def init_comp(self):
         """
@@ -372,18 +377,21 @@ class FidCompUnitary(FidelityComputer):
         )
 
     def normalize_SU(self, A):
-        try:
-            if A.shape[0] == A.shape[1]:
-                # input is an operator (Qobj, array), so
-                norm = _trace(A)
-            else:
-                raise TypeError("Cannot compute trace (not square)")
-        except AttributeError:
-            # assume input is already scalar and hence assumed
-            # to be the prenormalised scalar value, e.g. fidelity
+        if  np.isscalar(A):
+            # A is a scalar (could be a complex number)
             norm = A
+        else:
+            try:
+                if A.shape[0] == A.shape[1]:
+                    # Input is an operator (Qobj, array), so calculate the trace
+                    norm = _trace(A)
+                else:
+                    raise TypeError("Cannot compute trace (not square)")
+            except AttributeError:
+                # A does not have a shape attribute, assume it's a scalar
+                norm = A
         return np.real(norm) / self.dimensional_norm
-
+    
     def normalize_gradient_SU(self, grad):
         """
         Normalise the gradient matrix passed as grad
@@ -410,15 +418,76 @@ class FidCompUnitary(FidelityComputer):
         This PSU version is independent of global phase
         """
         fid_pn = self.get_fidelity_prenorm()
+        
         return np.real(
             grad * np.exp(-1j * np.angle(fid_pn)) / self.dimensional_norm
         )
+    
+    @staticmethod
+    def un_block_diag(M, block_size):
+        """
+        Unpacks block diagonal matrices from a block diagonal matrix M.
+        
+        Parameters:
+        M (ndarray): Block diagonal matrix.
+        block_size (int): Size of each block in the block diagonal matrix.
 
+        Returns:
+        blocks (list): List of block matrices extracted from M.
+        """
+        block_size = int(block_size)
+        n = M.shape[0]  # Size of the matrix
+        num_blocks = n // block_size  # Number of blocks
+
+        blocks = []
+        for i in range(num_blocks):
+            start = i * block_size
+            end = start + block_size
+            block = M[start:end, start:end]
+            blocks.append(block)
+        
+        return blocks
+    @staticmethod
+    def BlockUnitaryFidelity(phases, *Params):
+        Target_gate, Final_gate = Params
+        Gate_dim = Target_gate.shape[0]
+        Block_size = Gate_dim // len(phases)  # Use integer division
+
+        Target_blocks = FidCompUnitary.un_block_diag(Target_gate, Block_size)
+        Final_blocks = FidCompUnitary.un_block_diag(Final_gate, Block_size)
+
+        Product = [i.conj().T.dot(j) for i, j in zip(Target_blocks, Final_blocks)]
+        Product_trace = [np.trace(np.exp(1j * phases[i]) * Product[i]) for i in range(len(phases))]
+        Infidelity = np.abs(Gate_dim-np.sum(Product_trace)) # Return Infidelity (mimimize)
+        return Infidelity
+    
+    @staticmethod
+    def UnitaryFidelityOptimization(Target_gate, Final_gate, block_size):
+        Gate_dim = Target_gate.shape[0]
+        nblocks = Gate_dim // block_size  # Use integer division
+        p0 = np.ones(nblocks)
+        bounds = [(-np.pi ,np.pi) for _ in range(nblocks)]
+        args = (Target_gate, Final_gate)
+        
+        result = sp.optimize.minimize(FidCompUnitary.BlockUnitaryFidelity,
+                           p0, 
+                           args=args, 
+                           bounds=bounds,
+                           )
+
+        return Gate_dim - result.fun, result.x # Prenormalized, norm of the fidelity
+        
     def get_fid_err(self):
         """
         Gets the absolute error in the fidelity
         """
         return np.abs(1 - self.get_fidelity())
+    
+    # def get_corrected_fid_err(self):
+    #     """
+    #     Gets the corrected error in the fidelity
+    #     """
+    #     return np.abs(1 - self.get_corrected_fidelity())
 
     def get_fidelity(self):
         """
@@ -432,6 +501,18 @@ class FidCompUnitary(FidelityComputer):
             if self.log_level <= logging.DEBUG:
                 logger.debug("Fidelity (normalised): {}".format(self.fidelity))
         return self.fidelity
+
+    # def get_corrected_fidelity(self):
+    #     """
+    #     Gets the appropriately normalised fidelity value
+    #     The normalisation is determined by the fid_norm_func pointer
+    #     which should be set in the config
+    #     """
+        
+    #     self.corrected_fidelity = self.fid_norm_func(self.get_corrected_fidelity_prenorm())
+    #     if self.log_level <= logging.DEBUG:
+    #         logger.debug("Fidelity (normalised): {}".format(self.fidelity))
+    #     return self.corrected_fidelity
 
     def get_fidelity_prenorm(self):
         """
@@ -448,7 +529,11 @@ class FidCompUnitary(FidelityComputer):
                 if isinstance(f, Qobj):
                     f = f.tr()
             else:
-                f = _trace(dyn._onto_evo[k].dot(dyn._fwd_evo[k]))
+                f1, f2 = FidCompUnitary.UnitaryFidelityOptimization(dyn._onto_evo[k],
+                                                                dyn._fwd_evo[k], 
+                                                                block_size = 3)
+                f = _trace(dyn._onto_evo[k].dot(dyn._fwd_evo[k])) 
+                print(f1,f2)
             self.fidelity_prenorm = f
             self.fidelity_prenorm_current = True
             if dyn.stats is not None:
@@ -460,6 +545,27 @@ class FidCompUnitary(FidelityComputer):
                     )
                 )
         return self.fidelity_prenorm
+    
+    # def get_corrected_fidelity_prenorm(self):
+    #     """
+    #     Gets the current fidelity value prior to normalisation
+    #     Note the gradient function uses this value
+    #     The value is cached, because it is used in the gradient calculation
+    #     """
+        
+    #     dyn = self.parent
+    #     k = dyn.tslot_computer._get_timeslot_for_fidelity_calc()
+    #     dyn.compute_evolution()
+    #     if dyn.oper_dtype == Qobj:
+    #         f = dyn._onto_evo[k] * dyn._fwd_evo[k]
+    #         if isinstance(f, Qobj):
+    #             f = f.tr()
+    #     else:
+    #         f1 = FidCompUnitary.UnitaryFidelityOptimization(dyn._onto_evo[k],
+    #                                                             dyn._fwd_evo[k], 
+    #                                                             block_size = 3)
+    #     self.corrected_fidelity_prenorm = f1
+    #     return self.corrected_fidelity_prenorm
 
     def get_fid_err_gradient(self):
         """
@@ -502,7 +608,6 @@ class FidCompUnitary(FidelityComputer):
                 logger.debug(
                     "Gradient (sum sq norm): " "{} ".format(self.grad_norm)
                 )
-
         return self.fid_err_grad
 
     def compute_fid_grad(self):

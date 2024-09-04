@@ -101,7 +101,7 @@ else:
 
 def _is_string(var):
     try:
-        if isinstance(var, basestring):
+        if isinstance(var, basestring): # type: ignore
             return True
     except NameError:
         try:
@@ -1262,7 +1262,6 @@ class OptimizerCrabFmin(OptimizerCrab):
                 retall=self.record_iteration_steps,
                 callback=self.iter_step_callback_func,
             )
-
             final_param_vals = ret[0]
             num_iter = ret[2]
             warn_flag = ret[4]
