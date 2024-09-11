@@ -756,6 +756,19 @@ class Optimizer(object):
         # *** update stats ***
         if self.stats is not None:
             self.stats.num_iter = self.num_iter
+        
+        # *** track fidelity metrics ***
+        # Replace the following with your actual calculations
+        fid_comp = self.dynamics.fid_computer
+        qutip_prenorm_fid = fid_comp.get_fidelity_prenorm()
+        qutip_fid = fid_comp.get_fidelity()
+        corrected_fid = fid_comp.get_corrected_fidelity()
+        grad_norm = fid_comp.grad_norm
+
+        self.fidelity_evolution["Qutip_prenorm_fidelity"].append(qutip_prenorm_fid)
+        self.fidelity_evolution["Qutip_fidelity"].append(qutip_fid)
+        self.fidelity_evolution["Corrected_Fidelity"].append(corrected_fid)
+        self.fidelity_evolution["Gradient_norm"].append(grad_norm)
 
     def _interpret_term_exception(self, except_term, result):
         """
@@ -784,6 +797,7 @@ class Optimizer(object):
         result.fid_err = dyn.fid_computer.get_fid_err()
         result.grad_norm_final = dyn.fid_computer.grad_norm
         result.final_amps = dyn.ctrl_amps
+        result.fidelity_evolution = self.fidelity_evolution
         final_evo = dyn.full_evo
         if isinstance(final_evo, Qobj):
             result.evo_full_final = final_evo
@@ -909,6 +923,11 @@ class OptimizerLBFGSB(Optimizer):
         self.id_text = "LBFGSB"
         self.max_metric_corr = 10
         self.msg_level = None
+        self.fidelity_evolution = {
+            "Qutip_prenorm_fidelity":[],
+            "Qutip_fidelity": [],
+            "Corrected_Fidelity":[],
+            "Gradient_norm": []}
 
     def init_optim(self, term_conds):
         """

@@ -475,7 +475,7 @@ class FidCompUnitary(FidelityComputer):
                            bounds=bounds,
                            )
 
-        return Gate_dim - result.fun, result.x # Prenormalized, norm of the fidelity
+        return Gate_dim - result.fun # Prenormalized, norm of the fidelity
         
     def get_fid_err(self):
         """
@@ -483,11 +483,11 @@ class FidCompUnitary(FidelityComputer):
         """
         return np.abs(1 - self.get_fidelity())
     
-    # def get_corrected_fid_err(self):
-    #     """
-    #     Gets the corrected error in the fidelity
-    #     """
-    #     return np.abs(1 - self.get_corrected_fidelity())
+    def get_corrected_fid_err(self):
+        """
+        Gets the corrected error in the fidelity
+        """
+        return np.abs(1 - self.get_corrected_fidelity())
 
     def get_fidelity(self):
         """
@@ -502,17 +502,17 @@ class FidCompUnitary(FidelityComputer):
                 logger.debug("Fidelity (normalised): {}".format(self.fidelity))
         return self.fidelity
 
-    # def get_corrected_fidelity(self):
-    #     """
-    #     Gets the appropriately normalised fidelity value
-    #     The normalisation is determined by the fid_norm_func pointer
-    #     which should be set in the config
-    #     """
+    def get_corrected_fidelity(self):
+        """
+        Gets the appropriately normalised fidelity value
+        The normalisation is determined by the fid_norm_func pointer
+        which should be set in the config
+        """
         
-    #     self.corrected_fidelity = self.fid_norm_func(self.get_corrected_fidelity_prenorm())
-    #     if self.log_level <= logging.DEBUG:
-    #         logger.debug("Fidelity (normalised): {}".format(self.fidelity))
-    #     return self.corrected_fidelity
+        self.corrected_fidelity = self.fid_norm_func(self.get_corrected_fidelity_prenorm())
+        if self.log_level <= logging.DEBUG:
+            logger.debug("Fidelity (normalised): {}".format(self.fidelity))
+        return self.corrected_fidelity
 
     def get_fidelity_prenorm(self):
         """
@@ -529,11 +529,10 @@ class FidCompUnitary(FidelityComputer):
                 if isinstance(f, Qobj):
                     f = f.tr()
             else:
-                f1, f2 = FidCompUnitary.UnitaryFidelityOptimization(dyn._onto_evo[k],
-                                                                dyn._fwd_evo[k], 
-                                                                block_size = 3)
-                f = _trace(dyn._onto_evo[k].dot(dyn._fwd_evo[k])) 
-                print(f1,f2)
+                # f1 = FidCompUnitary.UnitaryFidelityOptimization(dyn._onto_evo[k],
+                #                                                 dyn._fwd_evo[k], 
+                #                                                 block_size = 3)
+                f = _trace(dyn._onto_evo[k].dot(dyn._fwd_evo[k]))
             self.fidelity_prenorm = f
             self.fidelity_prenorm_current = True
             if dyn.stats is not None:
@@ -546,26 +545,26 @@ class FidCompUnitary(FidelityComputer):
                 )
         return self.fidelity_prenorm
     
-    # def get_corrected_fidelity_prenorm(self):
-    #     """
-    #     Gets the current fidelity value prior to normalisation
-    #     Note the gradient function uses this value
-    #     The value is cached, because it is used in the gradient calculation
-    #     """
+    def get_corrected_fidelity_prenorm(self):
+        """
+        Gets the current fidelity value prior to normalisation
+        Note the gradient function uses this value
+        The value is cached, because it is used in the gradient calculation
+        """
         
-    #     dyn = self.parent
-    #     k = dyn.tslot_computer._get_timeslot_for_fidelity_calc()
-    #     dyn.compute_evolution()
-    #     if dyn.oper_dtype == Qobj:
-    #         f = dyn._onto_evo[k] * dyn._fwd_evo[k]
-    #         if isinstance(f, Qobj):
-    #             f = f.tr()
-    #     else:
-    #         f1 = FidCompUnitary.UnitaryFidelityOptimization(dyn._onto_evo[k],
-    #                                                             dyn._fwd_evo[k], 
-    #                                                             block_size = 3)
-    #     self.corrected_fidelity_prenorm = f1
-    #     return self.corrected_fidelity_prenorm
+        dyn = self.parent
+        k = dyn.tslot_computer._get_timeslot_for_fidelity_calc()
+        dyn.compute_evolution()
+        if dyn.oper_dtype == Qobj:
+            f = dyn._onto_evo[k] * dyn._fwd_evo[k]
+            if isinstance(f, Qobj):
+                f = f.tr()
+        else:
+            f1 = FidCompUnitary.UnitaryFidelityOptimization(dyn._onto_evo[k],
+                                                                dyn._fwd_evo[k], 
+                                                                block_size = 3)
+        self.corrected_fidelity_prenorm = f1
+        return self.corrected_fidelity_prenorm
 
     def get_fid_err_gradient(self):
         """
