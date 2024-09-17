@@ -1917,6 +1917,9 @@ def create_pulse_optimizer(
     elif fid_type_up == "UNIT":
         if not isinstance(dyn.fid_computer, fidcomp.FidCompUnitary):
             dyn.fid_computer = fidcomp.FidCompUnitary(dyn)
+    elif fid_type_up == "CORRECTEDUNIT":
+        if not isinstance(dyn.fid_computer, fidcomp.FidCompCorrectedUnitary):
+            dyn.fid_computer = fidcomp.FidCompCorrectedUnitary(dyn)
     else:
         raise errors.UsageError("No option for fid_type: " + fid_type)
     dyn.fid_computer.apply_params(fid_params)

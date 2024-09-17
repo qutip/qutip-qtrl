@@ -257,7 +257,6 @@ class FidelityComputer(object):
         )
         self.uses_onto_evo = value
 
-
 class FidCompUnitary(FidelityComputer):
     """
     Computes fidelity error and gradient assuming unitary dynamics, e.g.
@@ -338,7 +337,6 @@ class FidCompUnitary(FidelityComputer):
             raise errors.UsageError(
                 "No option for phase_option '{}'".format(value)
             )
-
 
     def init_comp(self):
         """
@@ -423,6 +421,16 @@ class FidCompUnitary(FidelityComputer):
             grad * np.exp(-1j * np.angle(fid_pn)) / self.dimensional_norm
         )
     
+    def normalize_corrected_gradient_PSU(self, corrected_grad):
+        """
+        Normalise the gradient matrix passed as grad
+        This PSU version is independent of global phase
+        """
+        fid_pn = self.get_corrected_fidelity_prenorm()
+        
+        return np.real(
+            corrected_grad * np.exp(-1j * np.angle(fid_pn)) / self.dimensional_norm
+        )
     @staticmethod
     def un_block_diag(M, block_size):
         """
@@ -460,9 +468,8 @@ class FidCompUnitary(FidelityComputer):
         Product_trace = [np.trace(np.exp(1j * phases[i]) * Product[i]) for i in range(len(phases))]
         Infidelity = np.abs(Gate_dim-np.sum(Product_trace)) # Return Infidelity (mimimize)
         return Infidelity
-    
     @staticmethod
-    def UnitaryFidelityOptimization(Target_gate, Final_gate, block_size):
+    def UnitaryFidelityOptimization(Target_gate, Final_gate, block_size, phase_matrix = False):
         Gate_dim = Target_gate.shape[0]
         nblocks = Gate_dim // block_size  # Use integer division
         p0 = np.ones(nblocks)
@@ -474,8 +481,14 @@ class FidCompUnitary(FidelityComputer):
                            args=args, 
                            bounds=bounds,
                            )
-
-        return Gate_dim - result.fun # Prenormalized, norm of the fidelity
+        if phase_matrix:
+            I = np.eye(block_size)
+            Angles = [ np.exp(1j * x) for x in result.x ]
+            Phi = [I * A for A in Angles]
+            Phi_matrix = sp.linalg.block_diag(*Phi)
+            return Phi_matrix
+        else:
+            return Gate_dim - result.fun # Prenormalized, norm of the fidelity
         
     def get_fid_err(self):
         """
@@ -609,6 +622,49 @@ class FidCompUnitary(FidelityComputer):
                 )
         return self.fid_err_grad
 
+    def get_corrected_fid_err_gradient(self):
+        """
+        Returns the normalised gradient of the fidelity error
+        in a (nTimeslots x n_ctrls) array
+        The gradients are cached in case they are requested
+        mutliple times between control updates
+        (although this is not typically found to happen)
+        """
+    
+        dyn = self.parent
+        grad_prenorm = self.compute_corrected_fid_grad()
+        if self.log_level <= logging.DEBUG_INTENSE:
+            logger.log(
+                logging.DEBUG_INTENSE,
+                "pre-normalised fidelity "
+                "gradients:\n{}".format(grad_prenorm),
+            )
+        # AJGP: Note this check should not be necessary if dynamics are
+        #       unitary. However, if they are not then this gradient
+        #       can still be used, however the interpretation is dubious
+        if self.get_fidelity() >= 1:
+            self.corrected_fid_err_grad = self.normalize_corrected_gradient_PSU(grad_prenorm)
+        else:
+            self.corrected_fid_err_grad = -self.normalize_corrected_gradient_PSU(grad_prenorm)
+
+        self.fid_err_grad_current = True
+        if dyn.stats is not None:
+            dyn.stats.num_grad_computes += 1
+
+        self.corrected_grad_norm = np.sqrt(np.sum(self.corrected_fid_err_grad**2))
+        if self.log_level <= logging.DEBUG_INTENSE:
+            logger.log(
+                logging.DEBUG_INTENSE,
+                "Normalised fidelity error "
+                "gradients:\n{}".format(self.corrected_fid_err_grad),
+            )
+
+        if self.log_level <= logging.DEBUG:
+            logger.debug(
+                "Gradient (sum sq norm): " "{} ".format(self.grad_norm)
+            )
+        return self.corrected_fid_err_grad
+
     def compute_fid_grad(self):
         """
         Calculates exact gradient of function wrt to each timeslot
@@ -635,7 +691,7 @@ class FidCompUnitary(FidelityComputer):
                     g = onto_evo * dyn._get_prop_grad(k, j) * fwd_evo
                     if isinstance(g, Qobj):
                         g = g.tr()
-                else:
+                else: ## ADD The PHI MATRIX HERE ##
                     g = _trace(
                         onto_evo.dot(dyn._get_prop_grad(k, j)).dot(fwd_evo)
                     )
@@ -645,6 +701,418 @@ class FidCompUnitary(FidelityComputer):
                 timeit.default_timer() - time_st
             )
         return grad
+    
+    def compute_corrected_fid_grad(self):
+        """
+        Calculates exact gradient of function wrt to each timeslot
+        control amplitudes. Note these gradients are not normalised
+        These are returned as a (nTimeslots x n_ctrls) array
+        """
+        dyn = self.parent
+        n_ctrls = dyn.num_ctrls
+        n_ts = dyn.num_tslots
+        k = dyn.tslot_computer._get_timeslot_for_fidelity_calc()
+        dyn.compute_evolution()
+        self.Phi = FidCompUnitary.UnitaryFidelityOptimization(dyn._onto_evo[k], dyn._fwd_evo[k], block_size = 3, phase_matrix=True)
+
+        # create n_ts x n_ctrls zero array for grad start point
+        grad = np.zeros([n_ts, n_ctrls], dtype=complex)
+
+        dyn.tslot_computer.flag_all_calc_now()
+        dyn.compute_evolution()
+        
+        # loop through all ctrl timeslots calculating gradients
+        time_st = timeit.default_timer()
+        for j in range(n_ctrls):
+            for k in range(n_ts):
+                fwd_evo = dyn._fwd_evo[k]
+                onto_evo = dyn._onto_evo[k + 1]
+                if dyn.oper_dtype == Qobj:
+                    g = onto_evo * dyn._get_prop_grad(k, j) * fwd_evo
+                    if isinstance(g, Qobj):
+                        g = g.tr()
+                else: ## ADD The PHI MATRIX HERE ##
+                    g = _trace(
+                        self.Phi.dot(onto_evo).dot(dyn._get_prop_grad(k, j)).dot(fwd_evo)
+                    )
+                grad[k, j] = g
+        if dyn.stats is not None:
+            dyn.stats.wall_time_gradient_compute += (
+                timeit.default_timer() - time_st
+            )
+        return grad
+
+class FidCompCorrectedUnitary(FidelityComputer):
+    """
+    Computes fidelity error and gradient assuming unitary dynamics, e.g.
+    closed qubit systems
+    Note fidelity and gradient calculations were taken from DYNAMO
+    (see file header)
+
+    Attributes
+    ----------
+    phase_option : string
+        determines how global phase is treated in fidelity calculations:
+            PSU - global phase ignored
+            SU - global phase included
+
+    fidelity_prenorm : complex
+        Last computed value of the fidelity before it is normalised
+        It is stored to use in the gradient normalisation calculation
+
+    fidelity_prenorm_current : boolean
+        flag to specify whether fidelity_prenorm are based on the
+        current amplitude values. Set False when amplitudes change
+    """
+
+    def reset(self):
+        FidelityComputer.reset(self)
+        self.id_text = "CORRECTEDUNIT"
+        self.uses_onto_evo = True
+        self._init_phase_option("PSU")
+        self.apply_params()
+
+    def clear(self):
+        FidelityComputer.clear(self)
+        self.fidelity_prenorm = None
+        self.fidelity_prenorm_current = False
+
+    def set_phase_option(self, phase_option=None):
+        """
+        Deprecated - use phase_option
+        Phase options are
+        SU - global phase important
+        PSU - global phase is not important
+        """
+        _func_deprecation(
+            "'set_phase_option' is deprecated. " "Use phase_option property"
+        )
+        self._init_phase_option(phase_option)
+
+    @property
+    def phase_option(self):
+        return self._phase_option
+
+    @phase_option.setter
+    def phase_option(self, value):
+        """
+        Phase options are
+         SU - global phase important
+         PSU - global phase is not important
+        """
+        self._init_phase_option(value)
+
+    def _init_phase_option(self, value):
+        """
+        based on phase option (SU or PSU), set the normalization function.
+        """
+        self._phase_option = value
+        if value == "PSU":
+            self.fid_norm_func = self.normalize_PSU
+            self.grad_norm_func = self.normalize_gradient_PSU
+        elif value == "SU":
+            self.fid_norm_func = self.normalize_SU
+            self.grad_norm_func = self.normalize_gradient_SU
+        elif value is None:
+            raise errors.UsageError(
+                "phase_option cannot be set to None"
+                " for this FidelityComputer."
+            )
+        else:
+            raise errors.UsageError(
+                "No option for phase_option '{}'".format(value)
+            )
+
+    def init_comp(self):
+        """
+        Check configuration and initialise the normalisation
+        """
+        if self.fid_norm_func is None or self.grad_norm_func is None:
+            raise errors.UsageError(
+                "The phase_option must be be set" "for this fidelity computer"
+            )
+        self.init_normalization()
+
+    def flag_system_changed(self):
+        """
+        Flag fidelity and gradients as needing recalculation
+        """
+        FidelityComputer.flag_system_changed(self)
+        # Flag the fidelity (prenormalisation) value as needing calculation
+        self.fidelity_prenorm_current = False
+
+    def init_normalization(self):
+        """
+        Calc norm of <Ufinal | Ufinal> to scale subsequent norms
+        When considering unitary time evolution operators, this basically
+        results in calculating the trace of the identity matrix
+        and is hence equal to the size of the target matrix
+        There may be situations where this is not the case, and hence it
+        is not assumed to be so.
+        The normalisation function called should be set to either the
+        PSU - global phase ignored
+        SU  - global phase respected
+        """
+        dyn = self.parent
+        self.dimensional_norm = 1.0
+        self.dimensional_norm = self.fid_norm_func(
+            dyn.target.dag() * dyn.target
+        )
+
+    def normalize_SU(self, A):
+        if  np.isscalar(A):
+            # A is a scalar (could be a complex number)
+            norm = A
+        else:
+            try:
+                if A.shape[0] == A.shape[1]:
+                    # Input is an operator (Qobj, array), so calculate the trace
+                    norm = _trace(A)
+                else:
+                    raise TypeError("Cannot compute trace (not square)")
+            except AttributeError:
+                # A does not have a shape attribute, assume it's a scalar
+                norm = A
+        return np.real(norm) / self.dimensional_norm
+    
+    def normalize_gradient_SU(self, grad):
+        """
+        Normalise the gradient matrix passed as grad
+        This SU version respects global phase
+        """
+        return np.real(grad) / self.dimensional_norm
+
+    def normalize_PSU(self, A):
+        # |g|/N = 1/N |Tr(A)| #
+        try:
+            if A.shape[0] == A.shape[1]:
+                # input is an operator (Qobj, array, sparse etc), so
+                norm = _trace(A)
+            else:
+                raise TypeError("Cannot compute trace (not square)")
+        except (AttributeError, IndexError):
+            # assume input is already scalar and hence assumed
+            # to be the prenormalised scalar value, e.g. fidelity
+            norm = A
+        return np.abs(norm) / self.dimensional_norm
+
+    def normalize_gradient_PSU(self, grad):
+
+        """
+        Normalise the gradient matrix passed as grad
+        This PSU version is independent of global phase
+        1/N * Re(e^iphi * g')
+        """
+        fid_pn = self.get_fidelity_prenorm()
+        
+        return np.real(
+            grad * np.exp(-1j * np.angle(fid_pn)) / self.dimensional_norm
+        )
+    
+    @staticmethod
+    def un_block_diag(M, block_size):
+        """
+        Unpacks block diagonal matrices from a block diagonal matrix M.
+        
+        Parameters:
+        M (ndarray): Block diagonal matrix.
+        block_size (int): Size of each block in the block diagonal matrix.
+
+        Returns:
+        blocks (list): List of block matrices extracted from M.
+        """
+        block_size = int(block_size)
+        n = M.shape[0]  # Size of the matrix
+        num_blocks = n // block_size  # Number of blocks
+
+        blocks = []
+        for i in range(num_blocks):
+            start = i * block_size
+            end = start + block_size
+            block = M[start:end, start:end]
+            blocks.append(block)
+        
+        return blocks
+    @staticmethod
+    def BlockUnitaryFidelity(phases, *Params):
+        Target_gate, Final_gate = Params
+        Gate_dim = Target_gate.shape[0]
+        Block_size = Gate_dim // len(phases)  # Use integer division
+
+        Target_blocks = FidCompUnitary.un_block_diag(Target_gate, Block_size)
+        Final_blocks = FidCompUnitary.un_block_diag(Final_gate, Block_size)
+
+        Product = [i.conj().T.dot(j) for i, j in zip(Target_blocks, Final_blocks)]
+        Product_trace = [np.trace(np.exp(1j * phases[i]) * Product[i]) for i in range(len(phases))]
+        Fmin = -np.sum(Product_trace) # Return Infidelity
+        return Fmin
+    @staticmethod
+    def phase_optim(Target_gate, Final_gate, block_size, phase_matrix = False, get_phases = False):
+        Gate_dim = Target_gate.shape[0]
+        nblocks = Gate_dim // block_size  # Use integer division
+        p0 = np.ones(nblocks)
+        bounds = [(-np.pi ,np.pi) for _ in range(nblocks)]
+        args = (Target_gate, Final_gate)
+        
+        result = sp.optimize.minimize(FidCompUnitary.BlockUnitaryFidelity,
+                           p0, 
+                           args=args, 
+                           bounds=bounds,
+                           )
+        if get_phases:
+            return result.x
+        if phase_matrix:
+            I = np.eye(block_size)
+            Angles = [ np.exp(1j * x) for x in result.x ]
+            Phi = [I * A for A in Angles]
+            return sp.linalg.block_diag(*Phi)
+        
+    def get_fid_err(self):
+        """
+        Gets the absolute error in the fidelity
+        """
+        return np.abs(1 - self.get_fidelity())
+
+    def get_fidelity(self):
+        """
+        Gets the appropriately normalised fidelity value
+        The normalisation is determined by the fid_norm_func pointer
+        which should be set in the config
+        """
+        if not self.fidelity_current:
+            self.fidelity = self.fid_norm_func(self.get_fidelity_prenorm())
+            self.fidelity_current = True
+            if self.log_level <= logging.DEBUG:
+                logger.debug("Fidelity (normalised): {}".format(self.fidelity))
+        return self.fidelity
+
+    def get_fidelity_prenorm(self):
+        """
+        Gets the current fidelity value prior to normalisation
+        Note the gradient function uses this value
+        The value is cached, because it is used in the gradient calculation
+        """
+        if not self.fidelity_prenorm_current:
+            dyn = self.parent
+            k = dyn.tslot_computer._get_timeslot_for_fidelity_calc()
+            dyn.compute_evolution()
+            if dyn.oper_dtype == Qobj:
+                f = dyn._onto_evo[k] * dyn._fwd_evo[k]
+                if isinstance(f, Qobj):
+                    f = f.tr()
+            else:
+                self.phase_matrix = FidCompCorrectedUnitary.phase_optim(dyn._onto_evo[k],
+                                                                        dyn._fwd_evo[k],
+                                                                        block_size = 3,
+                                                                        phase_matrix = True,
+                                                                        get_phases= False)
+                f = _trace(self.phase_matrix.dot(dyn._onto_evo[k]).dot(dyn._fwd_evo[k]))
+            self.fidelity_prenorm = f
+            self.fidelity_prenorm_current = True
+            if dyn.stats is not None:
+                dyn.stats.num_fidelity_computes += 1
+            if self.log_level <= logging.DEBUG:
+                logger.debug(
+                    "Fidelity (pre normalisation): {}".format(
+                        self.fidelity_prenorm
+                    )
+                )
+        return self.fidelity_prenorm
+    
+    def get_fid_err_gradient(self):
+        """
+        Returns the normalised gradient of the fidelity error
+        in a (nTimeslots x n_ctrls) array
+        The gradients are cached in case they are requested
+        mutliple times between control updates
+        (although this is not typically found to happen)
+        """
+        if not self.fid_err_grad_current:
+            dyn = self.parent
+            grad_prenorm = self.compute_fid_grad()
+            if self.log_level <= logging.DEBUG_INTENSE:
+                logger.log(
+                    logging.DEBUG_INTENSE,
+                    "pre-normalised fidelity "
+                    "gradients:\n{}".format(grad_prenorm),
+                )
+            # AJGP: Note this check should not be necessary if dynamics are
+            #       unitary. However, if they are not then this gradient
+            #       can still be used, however the interpretation is dubious
+            if self.get_fidelity() >= 1:
+                self.fid_err_grad = self.grad_norm_func(grad_prenorm)
+            else:
+                self.fid_err_grad = -self.grad_norm_func(grad_prenorm)
+
+            self.fid_err_grad_current = True
+            if dyn.stats is not None:
+                dyn.stats.num_grad_computes += 1
+
+            self.grad_norm = np.sqrt(np.sum(self.fid_err_grad**2))
+            if self.log_level <= logging.DEBUG_INTENSE:
+                logger.log(
+                    logging.DEBUG_INTENSE,
+                    "Normalised fidelity error "
+                    "gradients:\n{}".format(self.fid_err_grad),
+                )
+
+            if self.log_level <= logging.DEBUG:
+                logger.debug(
+                    "Gradient (sum sq norm): " "{} ".format(self.grad_norm)
+                )
+        return self.fid_err_grad
+
+    def compute_fid_grad(self):
+        """
+        Calculates exact gradient of function wrt to each timeslot
+        control amplitudes. Note these gradients are not normalised
+        These are returned as a (nTimeslots x n_ctrls) array
+        """
+        dyn = self.parent
+        n_ctrls = dyn.num_ctrls
+        n_ts = dyn.num_tslots
+        
+        # create n_ts x n_ctrls zero array for grad start point
+        grad = np.zeros([n_ts, n_ctrls], dtype=complex)
+
+        dyn.tslot_computer.flag_all_calc_now()
+        dyn.compute_evolution()
+
+        # loop through all ctrl timeslots calculating gradients
+        time_st = timeit.default_timer()
+        for j in range(n_ctrls):
+            for k in range(n_ts):
+                fwd_evo = dyn._fwd_evo[k]
+                onto_evo = dyn._onto_evo[k + 1]
+                if dyn.oper_dtype == Qobj:
+                    g = onto_evo * dyn._get_prop_grad(k, j) * fwd_evo
+                    if isinstance(g, Qobj):
+                        g = Qobj(self.phase_matrix.dot(g)).tr()
+                else: ## ADD The PHI MATRIX HERE (not added for now) ## 
+                    g = _trace(self.phase_matrix.dot(
+                        onto_evo).dot(dyn._get_prop_grad(k, j)).dot(fwd_evo)
+                    )
+                grad[k, j] = g
+        if dyn.stats is not None:
+            dyn.stats.wall_time_gradient_compute += (
+                timeit.default_timer() - time_st
+            )
+        return grad
+
+    def get_phases(self):
+        dyn = self.parent
+        k = dyn.tslot_computer._get_timeslot_for_fidelity_calc()
+        dyn.compute_evolution()
+        if dyn.oper_dtype == Qobj:
+            pass
+        else:
+            Phi= FidCompCorrectedUnitary.UnitaryFidelityOptimization(dyn._onto_evo[k], 
+                                                                         dyn._fwd_evo[k], 
+                                                                         block_size = 3, 
+                                                                         phase_matrix = False,
+                                                                         get_phases = True)
+        return Phi
+
 
 
 class FidCompTraceDiff(FidelityComputer):
