@@ -748,8 +748,8 @@ class FidCompCorrectedUnitary(FidelityComputer):
         Gate_dim = Target_gate.shape[0]
         Block_size = Gate_dim // len(phases)  # Use integer division
 
-        Target_blocks = FidCompUnitary.un_block_diag(Target_gate, Block_size)
-        Final_blocks = FidCompUnitary.un_block_diag(Final_gate, Block_size)
+        Target_blocks = FidCompCorrectedUnitary.un_block_diag(Target_gate, Block_size)
+        Final_blocks = FidCompCorrectedUnitary.un_block_diag(Final_gate, Block_size)
 
         Product = [i.conj().T.dot(j) for i, j in zip(Target_blocks, Final_blocks)]
         Product_trace = [np.trace(np.exp(1j * phases[i]) * Product[i]) for i in range(len(phases))]
@@ -763,7 +763,7 @@ class FidCompCorrectedUnitary(FidelityComputer):
         bounds = [(-np.pi ,np.pi) for _ in range(nblocks)]
         args = (Target_gate, Final_gate)
         
-        result = sp.optimize.minimize(FidCompUnitary.BlockUnitaryFidelity,
+        result = sp.optimize.minimize(FidCompCorrectedUnitary.BlockUnitaryFidelity,
                            p0, 
                            args=args, 
                            bounds=bounds,
@@ -922,8 +922,6 @@ class FidCompCorrectedUnitary(FidelityComputer):
                                                                          phase_matrix = False,
                                                                          get_phases = True)
         return Phi
-
-
 
 class FidCompTraceDiff(FidelityComputer):
     """
@@ -1097,7 +1095,6 @@ class FidCompTraceDiff(FidelityComputer):
                 timeit.default_timer() - time_st
             )
         return grad
-
 
 class FidCompTraceDiffApprox(FidCompTraceDiff):
     """
