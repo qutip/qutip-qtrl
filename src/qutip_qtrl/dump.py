@@ -11,7 +11,7 @@ data dumping.
 import os
 import copy
 import numpy as np
-
+from datetime import datetime
 # QuTiP control modules
 import qutip_qtrl.io as qtrlio
 
@@ -20,7 +20,9 @@ import qutip_qtrl.logging_utils
 
 logger = qutip_qtrl.logging_utils.get_logger("qutip.control.dump")
 
-DUMP_DIR = "~/.qtrl_dump"
+DUMP_DIR = os.getcwd() + "\\Dump"
+if not os.path.exists(DUMP_DIR):
+    os.makedirs(DUMP_DIR)
 
 
 class Dump:
@@ -266,7 +268,8 @@ class OptimDump(Dump):
         self.fid_err_log = []
         self.grad_norm_log = []
         self.grad_log = []
-        self._fname_base = "optimdump"
+        id = str(datetime.now()).replace(":","").replace( "-", "").replace(" ", "").replace(".","")
+        self._fname_base = "optimdump" + "-{}".format(id)
         self._fid_err_file = None
         self._grad_norm_file = None
 
