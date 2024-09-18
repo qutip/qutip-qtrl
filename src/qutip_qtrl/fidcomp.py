@@ -455,9 +455,6 @@ class FidCompUnitary(FidelityComputer):
                 if isinstance(f, Qobj):
                     f = f.tr()
             else:
-                # f1 = FidCompUnitary.UnitaryFidelityOptimization(dyn._onto_evo[k],
-                #                                                 dyn._fwd_evo[k], 
-                #                                                 block_size = 3)
                 f = _trace(dyn._onto_evo[k].dot(dyn._fwd_evo[k]))
             self.fidelity_prenorm = f
             self.fidelity_prenorm_current = True
@@ -753,7 +750,7 @@ class FidCompCorrectedUnitary(FidelityComputer):
 
         Product = [i.conj().T.dot(j) for i, j in zip(Target_blocks, Final_blocks)]
         Product_trace = [np.trace(np.exp(1j * phases[i]) * Product[i]) for i in range(len(phases))]
-        Fmin = -np.sum(Product_trace) # Return Infidelity
+        Fmin = -np.abs(np.sum(Product_trace)) # Return Infidelity
         return Fmin
     @staticmethod
     def phase_optim(Target_gate, Final_gate, block_size, phase_matrix = False, get_phases = False):
@@ -767,7 +764,7 @@ class FidCompCorrectedUnitary(FidelityComputer):
                            p0, 
                            args=args, 
                            bounds=bounds,
-                           tol=1e-7
+                           tol = 1e-10
                            )
         if get_phases:
             return result.x

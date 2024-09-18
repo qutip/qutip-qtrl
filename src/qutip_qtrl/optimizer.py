@@ -678,7 +678,7 @@ class Optimizer(object):
 
         if self.num_fid_func_calls > tc.max_fid_func_calls:
             raise errors.MaxFidFuncCallTerminate()
-
+        
         return err
 
     def fid_err_grad_wrapper(self, *args):
@@ -763,7 +763,7 @@ class Optimizer(object):
         fidelity_prenorm = fid_comp.get_fidelity_prenorm()
         fidelity = fid_comp.get_fidelity()
         grad_norm = fid_comp.grad_norm
-
+        
         self.fidelity_evolution["fidelity_prenorm"].append(fidelity_prenorm)
         self.fidelity_evolution["fidelity"].append(fidelity)
         self.fidelity_evolution["Gradient_norm"].append(grad_norm)
