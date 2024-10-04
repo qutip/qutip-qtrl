@@ -73,7 +73,6 @@ import qutip_qtrl.errors as errors
 import qutip_qtrl.dynamics as dynamics
 import qutip_qtrl.pulsegen as pulsegen
 import qutip_qtrl.dump as qtrldump
-
 import qutip_qtrl.logging_utils as logging
 
 logger = logging.get_logger()
@@ -1219,6 +1218,10 @@ class OptimizerCrabFmin(OptimizerCrab):
         self.id_text = "CRAB_FMIN"
         self.xtol = 1e-4
         self.ftol = 1e-4
+        self.fidelity_evolution = {
+            "fidelity":[],
+            "fidelity_prenorm": [],
+            "Gradient_norm": []}
 
     def run_optimization(self, term_conds=None):
         """
