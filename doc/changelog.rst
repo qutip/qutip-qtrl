@@ -2,6 +2,17 @@
 Changelog
 *********
 
+Version 0.1.4 (June 24, 2024)
++++++++++++++++++++++++++++++
+
+This patch fixes some changes due to numpy v2.
+
+Miscellaneous
+-------------
+
+- Increase the sampling points in tests for pulse optimization (#27, Boxi Li).
+
+
 Version 0.1.3 (June 24, 2024)
 +++++++++++++++++++++++++++++
 
