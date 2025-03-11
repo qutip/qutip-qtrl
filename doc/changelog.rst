@@ -3,7 +3,7 @@ Changelog
 *********
 
 Version 0.1.4 (February 10, 2025)
-+++++++++++++++++++++++++++++
++++++++++++++++++++++++++++++++++
 
 This patch implements changes necessary to support numpy v2.
 
