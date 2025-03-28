@@ -1,4 +1,4 @@
-""" Fast routines for grape implemented on top of the data layer. """
+"""Fast routines for grape implemented on top of the data layer."""
 
 import qutip.core.data as _data
 
