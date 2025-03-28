@@ -2,8 +2,20 @@
 Changelog
 *********
 
-Version 0.1.4 (February 10, 2025)
-+++++++++++++++++++++++++++++++++
+Version 0.1.5 (March 28, 2025)
+++++++++++++++++++++++++++++++
+
+Add support for the `qutip.about()` entry point. This causes the version of
+qutip-qip to be displayed when calling `qutip.about()`.
+
+Miscellaneous
+-------------
+
+- Add QuTiP family entry point (#35, Simon Cross).
+
+
+Version 0.1.4 (March 28, 2025)
+++++++++++++++++++++++++++++++
 
 This patch implements changes necessary to support numpy v2.
 
