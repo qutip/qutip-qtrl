@@ -2,7 +2,7 @@
 Changelog
 *********
 
-Version 0.2.0 (June 22, 2026)
+Version 0.2.0 (June 23, 2026)
 ++++++++++++++++++++++++++++++
 
 Miscellaneous
