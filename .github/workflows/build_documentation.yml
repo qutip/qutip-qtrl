@@ -9,9 +9,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         name: Install Python
         with:
           python-version: '3.11'
@@ -39,7 +39,7 @@ jobs:
           #   -T : display a full traceback if a Python exception occurs
 
       - name: Upload built files
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: qutip_qtrl_html_docs
           path: doc/_build/html/*
