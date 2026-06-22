@@ -23,6 +23,7 @@ Note the methods in these classes were inspired by:
 DYNAMO - Dynamic Framework for Quantum Optimal Control
 See Machnes et.al., arXiv.1011.4874
 """
+
 import warnings
 import numpy as np
 import scipy.linalg as la

@@ -10,6 +10,7 @@ Statistics for the optimisation
 Note that some of the stats here are redundant copies from the optimiser
 used here for calculations
 """
+
 import numpy as np
 import datetime
 
