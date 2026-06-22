@@ -908,7 +908,6 @@ class OptimizerLBFGSB(Optimizer):
         Optimizer.reset(self)
         self.id_text = "LBFGSB"
         self.max_metric_corr = 10
-        self.msg_level = None
 
     def init_optim(self, term_conds):
         """
@@ -930,14 +929,6 @@ class OptimizerLBFGSB(Optimizer):
                 term_conds.accuracy_factor = self.config.accuracy_factor
 
         Optimizer.init_optim(self, term_conds)
-
-        if not isinstance(self.msg_level, int):
-            if self.log_level < logging.DEBUG:
-                self.msg_level = 2
-            elif self.log_level <= logging.DEBUG:
-                self.msg_level = 1
-            else:
-                self.msg_level = 0
 
     def run_optimization(self, term_conds=None):
         """
@@ -1023,7 +1014,6 @@ class OptimizerLBFGSB(Optimizer):
                 m=m,
                 factr=factr,
                 pgtol=term_conds.min_gradient_norm,
-                disp=self.msg_level,
                 maxfun=term_conds.max_fid_func_calls,
                 maxiter=term_conds.max_iterations,
             )
