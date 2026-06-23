@@ -2,6 +2,15 @@
 Changelog
 *********
 
+Version 0.2.0 (June 23, 2026)
+++++++++++++++++++++++++++++++
+
+Miscellaneous
+-------------
+- Remove obsolete L-BFGS-B disp/msg_level handling (#41)
+- Upgrade actions to be compatible with supported Node.js of GitHub (#43)
+
+
 Version 0.1.5 (March 28, 2025)
 ++++++++++++++++++++++++++++++
 
