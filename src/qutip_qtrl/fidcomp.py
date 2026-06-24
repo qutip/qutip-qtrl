@@ -378,7 +378,7 @@ class FidCompUnitary(FidelityComputer):
                 norm = _trace(A)
             else:
                 raise TypeError("Cannot compute trace (not square)")
-        except AttributeError:
+        except (AttributeError, IndexError):
             # assume input is already scalar and hence assumed
             # to be the prenormalised scalar value, e.g. fidelity
             norm = A
