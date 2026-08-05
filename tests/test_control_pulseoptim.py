@@ -229,6 +229,10 @@ def _merge_kwargs(system, kwargs):
 
 
 class TestOptimization:
+    def test_result_fidelity(self):
+        result = _optimize_pulse(hadamard)
+        assert result.fidelity == pytest.approx(1 - result.fid_err)
+
     def test_basic_optimization(self, system, propagation):
         """Test the optimiser in the base case for each system."""
         system = _merge_kwargs(system, propagation)

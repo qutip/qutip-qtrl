@@ -782,6 +782,7 @@ class Optimizer(object):
         result.num_fid_func_calls = self.num_fid_func_calls
         result.wall_time = end_time - st_time
         result.fid_err = dyn.fid_computer.get_fid_err()
+        result.fidelity = 1.0 - result.fid_err
         result.grad_norm_final = dyn.fid_computer.grad_norm
         result.final_amps = dyn.ctrl_amps
         final_evo = dyn.full_evo
