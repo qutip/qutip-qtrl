@@ -104,9 +104,9 @@ def _is_string(var):
         try:
             if isinstance(var, str):
                 return True
-        except:
+        except Exception:
             return False
-    except:
+    except Exception:
         return False
 
 

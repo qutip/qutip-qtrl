@@ -153,7 +153,7 @@ def set_param(parser, section, option, obj, attrib_name):
     if isinstance(a, Qobj):
         try:
             q = Qobj(eval(val))
-        except:
+        except Exception:
             raise ValueError(
                 "Value '{}' cannot be used to generate a Qobj"
                 " in parameter file [{}].{}".format(val, section, option)
@@ -162,7 +162,7 @@ def set_param(parser, section, option, obj, attrib_name):
     elif isinstance(a, np.ndarray):
         try:
             arr = np.array(eval(val), dtype=a.dtype)
-        except:
+        except Exception:
             raise ValueError(
                 "Value '{}' cannot be used to generate an ndarray"
                 " in parameter file [{}].{}".format(val, section, option)
@@ -171,7 +171,7 @@ def set_param(parser, section, option, obj, attrib_name):
     elif isinstance(a, list):
         try:
             l = list(eval(val))
-        except:
+        except Exception:
             raise ValueError(
                 "Value '{}' cannot be used to generate a list"
                 " in parameter file [{}].{}".format(val, section, option)
@@ -180,10 +180,10 @@ def set_param(parser, section, option, obj, attrib_name):
     elif dtype == float:
         try:
             f = parser.getfloat(section, attrib_name)
-        except:
+        except Exception:
             try:
                 f = eval(val)
-            except:
+            except Exception:
                 raise ValueError(
                     "Value '{}' cannot be cast or evaluated as a "
                     "float in parameter file [{}].{}".format(
@@ -194,7 +194,7 @@ def set_param(parser, section, option, obj, attrib_name):
     elif dtype == complex:
         try:
             c = complex(val)
-        except:
+        except Exception:
             raise ValueError(
                 "Value '{}' cannot be cast as complex"
                 " in parameter file [{}].{}".format(val, section, option)
@@ -203,7 +203,7 @@ def set_param(parser, section, option, obj, attrib_name):
     elif dtype == int:
         try:
             i = parser.getint(section, attrib_name)
-        except:
+        except Exception:
             raise ValueError(
                 "Value '{}' cannot be cast as an int"
                 " in parameter file [{}].{}".format(val, section, option)
@@ -212,7 +212,7 @@ def set_param(parser, section, option, obj, attrib_name):
     elif dtype == bool:
         try:
             b = parser.getboolean(section, attrib_name)
-        except:
+        except Exception:
             raise ValueError(
                 "Value '{}' cannot be cast as a bool"
                 " in parameter file [{}].{}".format(val, section, option)
@@ -221,10 +221,10 @@ def set_param(parser, section, option, obj, attrib_name):
     else:
         try:
             val = parser.getfloat(section, attrib_name)
-        except:
+        except Exception:
             try:
                 val = parser.getboolean(section, attrib_name)
-            except:
+            except Exception:
                 pass
 
         setattr(obj, attrib_name, val)
