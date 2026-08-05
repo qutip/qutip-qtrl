@@ -9,8 +9,6 @@
 Configuration parameters for control pulse optimisation
 """
 
-import numpy as np
-
 # QuTiP logging
 import qutip_qtrl.logging_utils
 
