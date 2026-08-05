@@ -31,7 +31,7 @@ class OptimResult(object):
         final fidelity error that was achieved
 
     goal_achieved : boolean
-        True is the fidely error achieved was below the target
+        True if the fidelity error achieved was below the target
 
     grad_norm_final : float
         Final value of the sum of the squares of the (normalised) fidelity
@@ -73,7 +73,7 @@ class OptimResult(object):
         The evolution operator from t=0 to t=T based on the initial amps
 
     stats : Stats
-        Object contaning the stats for the run (if any collected)
+        Object containing the stats for the run (if any collected)
 
     optimizer : Optimizer
         Instance of the Optimizer used to generate the result
