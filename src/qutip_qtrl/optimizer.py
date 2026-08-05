@@ -61,10 +61,7 @@ import scipy
 import scipy.optimize as spopt
 import copy
 import collections
-import timeit
 
-import numpy as np
-import scipy.optimize as spopt
 
 from qutip import Qobj
 import qutip_qtrl.optimresult as optimresult
