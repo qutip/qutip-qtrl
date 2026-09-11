@@ -529,6 +529,8 @@ class Dynamics(object):
         # (see class file for details)
         if self.config.tslot_type == "DYNAMIC":
             self.tslot_computer = tslotcomp.TSlotCompDynUpdate(self)
+        elif self.config.tslot_type == "ALL_VEC":
+            self.tslot_computer = tslotcomp.TSlotCompUpdateAllVectorized(self)
         else:
             self.tslot_computer = tslotcomp.TSlotCompUpdateAll(self)
 
@@ -1554,6 +1556,8 @@ class DynamicsUnitary(Dynamics):
         # (see class file for details)
         if self.config.tslot_type == "DYNAMIC":
             self.tslot_computer = tslotcomp.TSlotCompDynUpdate(self)
+        elif self.config.tslot_type == "ALL_VEC":
+            self.tslot_computer = tslotcomp.TSlotCompUpdateAllVectorized(self)
         else:
             self.tslot_computer = tslotcomp.TSlotCompUpdateAll(self)
         # set the default fidelity computer
@@ -1764,6 +1768,8 @@ class DynamicsSymplectic(Dynamics):
         # (see class file for details)
         if self.config.tslot_type == "DYNAMIC":
             self.tslot_computer = tslotcomp.TSlotCompDynUpdate(self)
+        elif self.config.tslot_type == "ALL_VEC":
+            self.tslot_computer = tslotcomp.TSlotCompUpdateAllVectorized(self)
         else:
             self.tslot_computer = tslotcomp.TSlotCompUpdateAll(self)
 
