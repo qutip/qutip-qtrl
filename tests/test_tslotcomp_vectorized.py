@@ -122,12 +122,25 @@ def test_all_vec_qobj_mode_returns_qobj(fixed_amps):
     )
 
 
-def test_all_vec_falls_back_when_unsupported():
+def test_all_vec_falls_back_when_unsupported(fixed_amps):
     """Time-dependent control generators aren't handled by the
     vectorized path, so _vectorized_path_supported() must return False
     and recompute_evolution() must fall back to the serial computer
     without raising."""
     dyn = _build_dynamics(np.ndarray, 'ALL_VEC')
+    # initialize_controls() is what actually instantiates the
+    # tslot_type-selected TimeslotComputer subclass; before it runs,
+    # dyn.tslot_computer is still a pre-init placeholder that doesn't
+    # have _vectorized_path_supported() at all (as opposed to it being
+    # present but returning True) - every other test in this file
+    # already calls this first, this one just needs the same fixture.
+    dyn.initialize_controls(fixed_amps)
+    # Run one normal (supported) recompute first, using the exact same
+    # sequence as every other test in this file -- this is the setup
+    # already proven to instantiate TSlotCompUpdateAllVectorized
+    # correctly in CI. Only after that do we flip the flag and check
+    # that the *same* instance now reports itself as unsupported.
+    dyn.tslot_computer.recompute_evolution()
     # time_depend_ctrl_dyn_gen is one of the documented bail-out
     # conditions in _vectorized_path_supported(); force it directly
     # rather than constructing a full time-dependent Hamiltonian, since
