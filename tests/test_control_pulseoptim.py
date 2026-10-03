@@ -18,6 +18,7 @@ import scipy.sparse as sp
 import qutip
 import qutip_qtrl
 import qutip_qtrl.dynamics
+import qutip_qtrl.errors
 import qutip_qtrl.loadparams
 import qutip_qtrl.optimconfig
 import qutip_qtrl.pulsegen
@@ -510,6 +511,56 @@ def _load_optimizer(
     optimizer.termination_conditions = termination_conditions
     optimizer.stats = stats
     return optimizer
+
+
+@pytest.mark.parametrize(
+    ["tslot_type", "expected"],
+    [
+        pytest.param("DEF", "TSlotCompUpdateAll", id="default"),
+        pytest.param("update_all", "TSlotCompUpdateAll", id="update_all"),
+    ],
+)
+def test_tslot_type_selects_timeslot_computer(tslot_type, expected):
+    optimizer = cpo.create_pulse_optimizer(
+        hadamard.system,
+        hadamard.controls,
+        hadamard.initial,
+        hadamard.target,
+        tslot_type=tslot_type,
+        **hadamard.kwargs,
+    )
+    assert type(optimizer.dynamics.tslot_computer).__name__ == expected
+
+
+@pytest.mark.parametrize("tslot_type", ["NOT_A_TSLOT_TYPE", "DYNAMIC"])
+@pytest.mark.parametrize(
+    "optimize", [cpo.optimize_pulse, cpo.optimize_pulse_unitary]
+)
+def test_invalid_tslot_type_is_rejected(optimize, tslot_type):
+    # optimize_pulse_unitary fixes dyn_type itself
+    kwargs = {k: v for k, v in hadamard.kwargs.items() if k != "dyn_type"}
+    with pytest.raises(qutip_qtrl.errors.UsageError, match="tslot_type"):
+        optimize(
+            hadamard.system,
+            hadamard.controls,
+            hadamard.initial,
+            hadamard.target,
+            tslot_type=tslot_type,
+            **kwargs,
+        )
+
+
+def test_amp_update_mode_is_forwarded():
+    with pytest.warns(FutureWarning, match="amp_update_mode"):
+        with pytest.raises(qutip_qtrl.errors.UsageError, match="tslot_type"):
+            cpo.optimize_pulse(
+                hadamard.system,
+                hadamard.controls,
+                hadamard.initial,
+                hadamard.target,
+                amp_update_mode="NOT_A_TSLOT_TYPE",
+                **hadamard.kwargs,
+            )
 
 
 class TestFileIO:

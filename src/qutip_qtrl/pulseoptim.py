@@ -453,6 +453,7 @@ def optimize_pulse(
         prop_params=prop_params,
         fid_type=fid_type,
         fid_params=fid_params,
+        tslot_type=tslot_type,
         init_pulse_type=init_pulse_type,
         init_pulse_params=init_pulse_params,
         pulse_scaling=pulse_scaling,
@@ -841,6 +842,7 @@ def optimize_pulse_unitary(
         dyn_params=dyn_params,
         prop_params=prop_params,
         fid_params=fid_params,
+        tslot_type=tslot_type,
         init_pulse_type=init_pulse_type,
         init_pulse_params=init_pulse_params,
         pulse_scaling=pulse_scaling,
@@ -1852,8 +1854,24 @@ def create_pulse_optimizer(
             "No option for pulse optimisation algorithm alg={}".format(alg)
         )
 
+    tslot_type_up = _upper_safe(tslot_type)
+    if tslot_type_up is None or tslot_type_up == "":
+        tslot_type_up = "DEF"
+    if tslot_type_up == "DYNAMIC":
+        # TSlotCompDynUpdate does not implement the interface the fidelity
+        # computers use, so only UPDATE_ALL can be supported here
+        raise errors.UsageError(
+            "tslot_type 'DYNAMIC' is not currently supported, "
+            "use 'UPDATE_ALL' (the default)"
+        )
+    if tslot_type_up not in ("DEF", "UPDATE_ALL"):
+        raise errors.UsageError(
+            "No option for tslot_type: {}".format(tslot_type)
+        )
+
     cfg = optimconfig.OptimConfig()
     cfg.optim_method = optim_method
+    cfg.tslot_type = tslot_type_up
     cfg.dyn_type = dyn_type
     cfg.prop_type = prop_type
     cfg.fid_type = fid_type
