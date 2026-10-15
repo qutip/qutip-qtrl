@@ -5,8 +5,8 @@ debug logs, using Python's internal logging functionality by default.
 
 # IMPORTS
 from __future__ import absolute_import
-import inspect
 import logging
+import sys
 
 from qutip.settings import settings
 
@@ -52,13 +52,8 @@ def get_logger(name=None):
     """
     if name is None:
         try:
-            calling_frame = inspect.stack()[1][0]
-            calling_module = inspect.getmodule(calling_frame)
-            name = (
-                calling_module.__name__
-                if calling_module is not None
-                else "<none>"
-            )
+            # Name the logger after the module that called get_logger().
+            name = sys._getframe(1).f_globals.get("__name__", "<none>")
 
         except Exception:
             metalogger.warn("Error creating logger.", exc_info=1)
